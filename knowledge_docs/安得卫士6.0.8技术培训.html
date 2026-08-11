@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="tokyo-night">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>安得卫士6.0.9版本介绍与技术培训</title>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" id="theme-link" href="assets/themes/tokyo-night.css">
+<link rel="stylesheet" href="assets/animations/animations.css">
+<style>
+.t{width:100%;border-collapse:collapse;font-size:14px}
+.t th,.t td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+.t th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:600}
+.t tr:hover td{background:var(--surface-2)}
+.t td.num{font-variant-numeric:tabular-nums;text-align:right}
+.code-block{background:var(--surface-2);padding:14px;border-radius:var(--radius-sm);font-family:JetBrains Mono,monospace;font-size:13px;overflow-x:auto;white-space:pre-wrap;line-height:1.6}
+.slide-img{max-width:100%;max-height:320px;border-radius:var(--radius-sm);object-fit:contain;margin:8px 0}
+.slide-img-full{max-width:100%;max-height:400px;border-radius:var(--radius-sm);object-fit:contain;margin:8px auto;display:block}
+.img-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.img-row img{max-height:200px;max-width:48%;border-radius:var(--radius-sm);object-fit:contain}
+.img-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.img-grid .img-item{text-align:center;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 6px 6px;transition:border-color .25s,box-shadow .25s;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:130px}
+.img-grid .img-item:hover{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.img-grid .img-item img{width:100%;max-height:120px;border-radius:calc(var(--radius-sm) - 2px);object-fit:contain;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
+.img-grid .img-item:hover img{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(3);z-index:9999;max-width:70vw;max-height:70vh;width:auto;height:auto;box-shadow:0 8px 32px rgba(0,0,0,.45);border-radius:var(--radius-sm)}
+[data-title="ISO一键安装包"] .img-grid .img-item:hover img,
+[data-title="Mac客户端"] .img-grid .img-item:hover img{transform:translate(-50%,-50%) scale(2)}
+[data-title="用户来源与角色"] .img-grid .img-item:hover img{transform:translate(-50%,-50%) scale(4)}
+[data-title="安全隔离"] .img-grid .img-item:hover img{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(1);z-index:9999;max-width:70vw;max-height:70vh;width:auto;height:auto;box-shadow:0 8px 32px rgba(0,0,0,.45);border-radius:var(--radius-sm);cursor:zoom-in}
+[data-title="沙盒管控"] .img-grid .img-item:hover img{transform:translate(-50%,-50%) scale(3.5)}
+[data-title="权限文件"] .img-grid .img-item:hover img{transform:translate(-50%,-50%) scale(5)}
+[data-title="常见工具"] .img-item:hover img{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(4);z-index:9999;max-width:70vw;max-height:70vh;width:auto;height:auto;box-shadow:0 8px 32px rgba(0,0,0,.45);border-radius:var(--radius-sm)}
+.deck .slide img:not([class*="nozoom"]):not(.img-item img){cursor:zoom-in;transition:transform .25s ease,box-shadow .25s ease}
+.deck .slide img:not([class*="nozoom"]):not(.img-item img):hover{transform:scale(1.6);box-shadow:0 8px 32px rgba(0,0,0,.35);position:relative;z-index:100}
+.img-grid .img-item .cap{font-size:11px;color:var(--text-3);margin-top:6px;line-height:1.3;font-weight:500}
+
+/* === Global beautification === */
+/* 不再覆盖 base.css 的 .slide 切换逻辑，避免与 runtime 的 display 切换冲突 */
+/* Animated underline on h1 - 关闭 */
+
+/* Glassy card polish */
+.card{position:relative;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);background:linear-gradient(180deg,var(--surface),color-mix(in srgb,var(--surface) 80%,transparent));border:1px solid color-mix(in srgb,var(--border) 70%,transparent);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.card:hover{transform:translateY(-2px);box-shadow:0 12px 28px -12px color-mix(in srgb,var(--accent) 50%,transparent);border-color:color-mix(in srgb,var(--accent) 50%,transparent)}
+
+/* Accent ribbon for important cards */
+.card-accent::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 40%,transparent));border-radius:var(--radius-sm) 0 0 var(--radius-sm)}
+
+/* Pill / badge primitive */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.02em;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+.pill.dim{background:var(--surface-2);color:var(--text-3);border-color:var(--border)}
+.pill.warn{background:color-mix(in srgb,#f59e0b 14%,transparent);color:#f59e0b;border-color:color-mix(in srgb,#f59e0b 30%,transparent)}
+.pill.ok{background:color-mix(in srgb,#10b981 14%,transparent);color:#10b981;border-color:color-mix(in srgb,#10b981 30%,transparent)}
+.pill.danger{background:color-mix(in srgb,#ef4444 14%,transparent);color:#ef4444;border-color:color-mix(in srgb,#ef4444 30%,transparent)}
+.pill.info{background:color-mix(in srgb,#3b82f6 14%,transparent);color:#3b82f6;border-color:color-mix(in srgb,#3b82f6 30%,transparent)}
+
+/* Subtle gradient text */
+.gradient-text{background:linear-gradient(135deg,var(--accent) 0%,color-mix(in srgb,var(--accent) 60%,#ec4899) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* H2 underline */
+.h2{display:inline-block;position:relative;padding-bottom:6px}
+.h2::after{content:"";position:absolute;left:0;bottom:0;width:48px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+
+/* Sticky deck-header glass */
+.deck-header{position:relative;padding:8px 14px;margin:-12px -16px 14px;border-radius:var(--radius-sm);background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 90%,transparent),transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent)}
+
+/* Footer glass */
+.deck-footer{position:relative;margin:14px -16px -12px;padding:8px 14px;border-radius:var(--radius-sm);background:linear-gradient(0deg,color-mix(in srgb,var(--surface) 90%,transparent),transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid color-mix(in srgb,var(--border) 60%,transparent)}
+
+/* Section divider visual upgrade */
+section[data-title="服务器部署"] h1,
+section[data-title="客户端部署"] h1,
+section[data-title="核心功能"] h1{position:relative;display:inline-block}
+
+/* Section divider background ornament */
+section[data-title="服务器部署"],
+section[data-title="客户端部署"],
+section[data-title="核心功能"],
+section[data-title="Section 1 Divider"],
+section[data-title="Section 2 Divider"],
+section[data-title="Section 3 Divider"],
+section[data-title="Section 4 Divider"]{position:relative;overflow:hidden}
+section[data-title="服务器部署"]::after,
+section[data-title="客户端部署"]::after,
+section[data-title="核心功能"]::after,
+section[data-title="Section 1 Divider"]::after,
+section[data-title="Section 2 Divider"]::after,
+section[data-title="Section 3 Divider"]::after,
+section[data-title="Section 4 Divider"]::after{content:"";position:absolute;right:-80px;top:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 18%,transparent) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+/* Animated underline on h1 - 关闭 */
+.h1{display:inline-block}
+.h1-sub{display:block;font-size:36px;font-weight:600;color:var(--text-1);margin:8px 0 0;letter-spacing:.02em}
+/* Cover page compact 3-line layout */
+.cover-title{font-size:96px;line-height:1;margin:14px 0 0;display:block}
+.cover-sub{font-size:30px;font-weight:500;color:var(--text-2);margin:8px 0 0;letter-spacing:.04em}
+.cover-lede{font-size:18px;color:var(--text-3);margin:24px 0 0;letter-spacing:.02em}
+
+/* Kicker pulse */
+.kicker{display:inline-flex;align-items:center;gap:6px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:11px}
+.kicker::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 80%,transparent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent)}50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 0%,transparent)}}
+
+/* Top progress bar (auto-injected) */
+.deck-progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 50%,#ec4899));z-index:1000;transition:width .35s cubic-bezier(.22,.61,.36,1);box-shadow:0 0 8px color-mix(in srgb,var(--accent) 60%,transparent)}
+
+/* Code blocks polish */
+code,pre{font-family:JetBrains Mono,ui-monospace,monospace}
+
+/* Better list bullets */
+.slide ul li{position:relative;padding-left:4px}
+.slide ul li::marker{color:var(--accent)}
+
+/* Image container shadow */
+.img-grid .img-item{box-shadow:0 2px 8px -4px rgba(0,0,0,.15)}
+
+/* Table polish */
+.t{border-radius:var(--radius-sm);overflow:hidden}
+.t th{background:var(--surface-2)}
+</style>
+</head>
+<body>
+<div class="deck" data-themes="tokyo-night,aurora,catppuccin-mocha,minimal-white,blueprint,corporate-clean" data-theme-base="assets/themes/">
+
+  <!-- Slide 1: Cover -->
+  <section class="slide center tc" data-title="Cover">
+    <div style="max-width:900px;margin:0 auto">
+    <div class="anim-stagger-list">
+      <p class="kicker">Endpoint Security · 终端安全</p>
+      <h1 class="h1 cover-title">安得卫士<span class="gradient-text">6.0.9</span></h1>
+      <p class="h1-sub cover-sub">版本介绍与技术培训</p>
+      <p class="lede cover-lede">服务器部署 · 客户端部署 · 核心功能 · 常见问题</p>
+    </div>
+    </div>
+    <div class="deck-footer"><span class="dim2">iAndSec · 安得卫士</span><span class="slide-number" data-current="1" data-total="35"></span></div>
+  </section>
+
+  <!-- Slide 2: TOC -->
+  <section class="slide" data-title="目录">
+    <p class="kicker">Agenda · 目录</p>
+    <h2 class="h2">今天讲四件事</h2>
+    <div class="grid g2 mt-l anim-stagger-list" data-anim-target>
+      <div class="card card-accent">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 50%,#ec4899));color:#fff;font-weight:700;font-size:15px;flex-shrink:0">01</span>
+          <h3 style="margin:0">服务器部署</h3>
+        </div>
+        <p class="dim">Linux/ISO/Windows一键安装包、外网映射、集成命令secctl</p>
+        <div style="margin-top:8px"><span class="pill dim">~10 min</span></div>
+      </div>
+      <div class="card card-accent">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 50%,#3b82f6));color:#fff;font-weight:700;font-size:15px;flex-shrink:0">02</span>
+          <h3 style="margin:0">客户端部署</h3>
+        </div>
+        <p class="dim">Windows/Mac/Linux/手机客户端的部署与注意事项</p>
+        <div style="margin-top:8px"><span class="pill dim">~8 min</span></div>
+      </div>
+      <div class="card card-accent">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 50%,#10b981));color:#fff;font-weight:700;font-size:15px;flex-shrink:0">03</span>
+          <h3 style="margin:0">核心功能</h3>
+        </div>
+        <p class="dim">加解密、流程管理、外发云盒、沙盒、桌管、DLP、网关等</p>
+        <div style="margin-top:8px"><span class="pill dim">~25 min</span></div>
+      </div>
+      <div class="card card-accent">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 50%,#f59e0b));color:#fff;font-weight:700;font-size:15px;flex-shrink:0">04</span>
+          <h3 style="margin:0">问题案例</h3>
+        </div>
+        <p class="dim">驱动问题、终端问题、加密逻辑、HOOK注入及常见工具</p>
+        <div style="margin-top:8px"><span class="pill dim">~12 min</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3: Section 1 Divider -->
+  <section class="slide center tc" data-title="第一章">
+    <div style="max-width:900px;margin:0 auto;position:relative;z-index:1">
+      <span class="pill anim-fade-down" data-anim="fade-down" style="font-size:12px;padding:6px 16px">Chapter 01 · 第一章</span>
+      <h1 class="h1" style="font-size:72px;margin:18px 0 0">服务器部署 <span class="gradient-text">& 注意事项</span></h1>
+      <div class="divider-accent" style="margin:20px auto"></div>
+      <p class="lede">支持多元化部署方式，灵活便捷且高效</p>
+      <div style="display:flex;gap:24px;justify-content:center;margin-top:32px;flex-wrap:wrap">
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">3</div><p class="dim" style="font-size:11px;margin-top:4px">部署方式</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">9+</div><p class="dim" style="font-size:11px;margin-top:4px">支持系统</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">4</div><p class="dim" style="font-size:11px;margin-top:4px">数据库</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">1</div><p class="dim" style="font-size:11px;margin-top:4px">secctl</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4: Server Deployment Methods -->
+  <section class="slide" data-title="服务器部署方式">
+    <p class="kicker">Server · 服务器</p>
+    <h2 class="h2">服务器部署方式</h2>
+    <p class="lede mb-l">支持本地服务器、云服务器或虚拟化部署，满足多样化需求</p>
+    <div class="grid g3 mt-l anim-stagger-list" data-anim-target>
+      <div class="card"><h4>本地部署</h4><p class="dim">适用于对数据安全性要求高的企业，服务器部署在企业内部网络中</p></div>
+      <div class="card"><h4>云服务器</h4><p class="dim">支持主流云平台（阿里云、腾讯云、华为云等），弹性扩展</p></div>
+      <div class="card"><h4>虚拟化</h4><p class="dim">支持VMware、Hyper-V等虚拟化环境，资源利用率更高</p></div>
+    </div>
+    <div class="mt-l">
+      <h3 class="h3 mb-s">部署详情</h3>
+      <div class="grid g4 anim-stagger-list" data-anim-target>
+        <div class="card">
+          <h4>部署方式</h4>
+          <p class="dim">Linux一键安装包 · ISO一键安装 · Windows一键安装</p>
+        </div>
+        <div class="card">
+          <h4>支持的系统</h4>
+          <p class="dim">Centos 7.x · RockyLinux 9.5<br>openEuler 24.03 · 麒麟V10（X86/ARM）<br>Win10 · Win11 · WinServer 2016+</p>
+        </div>
+        <div class="card">
+          <h4>支持的数据库</h4>
+          <p class="dim">MySQL / 达梦</p>
+        </div>
+        <div class="card">
+          <h4>建议配置</h4>
+          <p class="dim">4H 16G 1T</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5: Linux Install -->
+  <section class="slide" data-title="Linux一键安装包">
+    <p class="kicker">Linux · 一键安装</p>
+    <h2 class="h2">Linux一键安装包</h2>
+    <div class="grid g2 mt-l">
+      <div class="card anim-fade-left" data-anim="fade-left">
+        <h4>全量安装</h4>
+        <div class="code-block">sh install316-20250210-506.bin i</div>
+        <p class="dim mt-s">注：全新安装会检测端口3443、8443、9099、12121是否被占用</p>
+      </div>
+      <div class="card anim-fade-right" data-anim="fade-right">
+        <h4>组件拆分安装</h4>
+        <div class="code-block">只安装主程序：sh install.bin app
+只安装MySQL：sh install.bin mysql
+只安装文件服务器：sh install.bin fileserver
+只安装ES：sh install.bin es</div>
+      </div>
+    </div>
+    <div class="card mt-l"><h4>其他操作</h4>
+      <div class="code-block">卸载：sh install316-20250210-506.bin u
+升级：sh install316-20250210-506.bin r</div>
+    </div>
+  </section>
+
+  <!-- Slide 6: ISO Install -->
+  <section class="slide" data-title="ISO一键安装包">
+    <p class="kicker">ISO · 一键安装</p>
+    <h2 class="h2">ISO一键安装包</h2>
+    <div class="flex gap-s mb-m" style="align-items:center;flex-wrap:wrap">
+      <span class="pill pill-accent">root禁止远程登录</span>
+      <span class="pill">用户名：<code>iandsec</code></span>
+      <span class="pill">密码：<code>Iandsec@2025.com</code></span>
+    </div>
+    <div class="img-grid" style="margin-top:auto;margin-bottom:auto">
+      <div class="img-item" style="padding:14px 10px 10px"><img src="images/slide06_img001.png" alt="启动界面"><p class="cap">启动界面</p></div>
+      <div class="img-item" style="padding:14px 10px 10px"><img src="images/slide06_img002.png" alt="语言选择"><p class="cap">语言选择</p></div>
+      <div class="img-item" style="padding:14px 10px 10px"><img src="images/slide06_img003.png" alt="磁盘分区"><p class="cap">磁盘分区</p></div>
+      <div class="img-item" style="padding:14px 10px 10px"><img src="images/slide06_img004.png" alt="网络配置"><p class="cap">网络配置</p></div>
+      <div class="img-item" style="padding:14px 10px 10px"><img src="images/slide06_img005.png" alt="安装进度"><p class="cap">安装进度</p></div>
+      <div class="img-item" style="padding:14px 10px 10px"><img src="images/slide06_img006.png" alt="安装完成"><p class="cap">安装完成</p></div>
+    </div>
+  </section>
+
+  <!-- Slide 7: Windows Install -->
+  <section class="slide" data-title="Windows一键安装包">
+    <p class="kicker">Windows · 一键安装</p>
+    <h2 class="h2">Windows一键安装包</h2>
+    <div class="grid g2 mt-l">
+      <div class="card">
+        <ul>
+          <li>选择安装目录</li>
+          <li>一键安装，自动配置</li>
+          <li>安装后设置服务器地址</li>
+          <li>输入账号密码登录</li>
+        </ul>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center">
+        <img src="images/slide07_img007.png" class="slide-img" alt="Windows安装">
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 8: secctl Command -->
+  <section class="slide" data-title="集成命令secctl">
+    <p class="kicker">secctl · 集成命令工具</p>
+    <h2 class="h2">集成命令secctl</h2>
+    <p class="lede mb-l">将一系列常用命令整合至secctl工具中，显著降低操作复杂度与难度</p>
+    <div class="grid g2 mt-l">
+      <div class="card anim-fade-left" data-anim="fade-left">
+        <h4>使用secctl可以快速：</h4>
+        <ul class="mt-m">
+          <li>查看和管理服务状态</li>
+          <li>配置端口信息</li>
+          <li>查看日志和诊断信息</li>
+          <li>执行日常运维操作</li>
+        </ul>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center">
+        <img src="images/slide08_img008.png" class="slide-img" alt="secctl命令">
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 9: External Network Mapping -->
+  <section class="slide" data-title="外网映射">
+    <p class="kicker">Port Mapping · 端口映射</p>
+    <h2 class="h2">外网映射</h2>
+    <div class="card mt-l">
+    <table class="t">
+      <thead><tr><th>端口</th><th>用途</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><b>3443</b></td><td>Mac & Linux</td><td>不涉及的项目可不开放</td></tr>
+        <tr><td><b>8443</b></td><td>Web服务</td><td>不开放无法访问Web、客户端无法登录</td></tr>
+        <tr><td><b>9099</b></td><td>通讯端口</td><td>不开放无法登录、无法收到消息提醒</td></tr>
+        <tr><td><b>12121</b></td><td>文件服务器</td><td>不开放流程附件无法上传</td></tr>
+        <tr><td><b>8013</b></td><td>文件预览</td><td>文件预览服务端口</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <img src="images/slide09_img009.png" class="slide-img-full" style="max-height:200px" alt="外网映射">
+  </section>
+
+  <!-- Slide 10: Section 2 Divider -->
+  <section class="slide center tc" data-title="第二章">
+    <div style="max-width:900px;margin:0 auto;position:relative;z-index:1">
+      <span class="pill anim-fade-down" data-anim="fade-down" style="font-size:12px;padding:6px 16px">Chapter 02 · 第二章</span>
+      <h1 class="h1" style="font-size:72px;margin:18px 0 0">客户端部署 <span class="gradient-text">& 注意事项</span></h1>
+      <div class="divider-accent" style="margin:20px auto"></div>
+      <p class="lede">Windows · Mac · Linux · 手机客户端</p>
+      <div style="display:flex;gap:24px;justify-content:center;margin-top:32px;flex-wrap:wrap">
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">4</div><p class="dim" style="font-size:11px;margin-top:4px">平台支持</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">1</div><p class="dim" style="font-size:11px;margin-top:4px">服务地址</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">3</div><p class="dim" style="font-size:11px;margin-top:4px">注意事项</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">8+</div><p class="dim" style="font-size:11px;margin-top:4px">版本</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 11: Windows Client Package -->
+  <section class="slide" data-title="Windows客户端包制作">
+    <p class="kicker">Windows · 客户端</p>
+    <h2 class="h2">Windows客户端包制作</h2>
+    <div class="grid g2" style="margin-top:12px;flex:1;grid-template-rows:auto 1fr;gap:10px">
+      <!-- Left: 包制作功能 -->
+      <div class="card" style="padding:14px 18px;margin:0">
+        <h4>包制作功能</h4>
+        <ul style="margin-top:10px;font-size:13px">
+          <li>支持重新设置服务器地址、Web通讯端口（8443）、心跳通讯端口（9099）</li>
+          <li>支持设置包的模式：有用户 / 无用户</li>
+          <li><b>无用户包</b>：安装后无需输入用户，自动登录</li>
+        </ul>
+      </div>
+      <!-- Right: 客户端安装步骤条 -->
+      <div style="display:flex;align-items:stretch;gap:0;background:var(--surface-2);border-radius:var(--radius);border:1px solid var(--border);padding:0">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 4px;border-right:1px solid var(--border)">
+          <span class="pill pill-accent" style="margin-bottom:4px;font-size:11px;padding:1px 10px">1</span>
+          <p class="dim" style="font-size:12px;margin:0;line-height:1.3;text-align:center">关闭杀毒软件</p>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 4px;border-right:1px solid var(--border)">
+          <span class="pill pill-accent" style="margin-bottom:4px;font-size:11px;padding:1px 10px">2</span>
+          <p class="dim" style="font-size:12px;margin:0;line-height:1.3;text-align:center">按需勾选模块</p>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 4px;border-right:1px solid var(--border)">
+          <span class="pill pill-accent" style="margin-bottom:4px;font-size:11px;padding:1px 10px">3</span>
+          <p class="dim" style="font-size:12px;margin:0;line-height:1.3;text-align:center">设置服务器地址</p>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 4px">
+          <span class="pill pill-accent" style="margin-bottom:4px;font-size:11px;padding:1px 10px">4</span>
+          <p class="dim" style="font-size:12px;margin:0;line-height:1.3;text-align:center">输入账号登录</p>
+        </div>
+      </div>
+      <!-- Bottom Left: images -->
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0">
+        <div class="img-item" style="padding:10px"><img src="images/slide11_img010.png" style="max-height:120px" alt="Windows包制作1"><p class="cap">包制作-地址端口设置</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide11_img011.png" style="max-height:120px" alt="Windows包制作2"><p class="cap">包制作-模式选择</p></div>
+      </div>
+      <!-- Bottom Right: image -->
+      <div class="img-grid" style="grid-template-columns:1fr;gap:0;margin:0">
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide13_img013.png" style="max-height:180px" alt="Windows客户端安装"><p class="cap">客户端安装界面</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 12: Mac Client -->
+  <section class="slide" data-title="Mac客户端">
+    <p class="kicker">Mac · 客户端</p>
+    <h2 class="h2">Mac客户端部署</h2>
+    <div class="grid g2" style="margin-top:16px;flex:1;grid-template-rows:auto 1fr;gap:12px">
+      <!-- Left: 包制作 -->
+      <div class="card" style="margin:0;padding:16px 20px">
+        <h4>包制作</h4>
+        <ul class="mt-m" style="font-size:13px">
+          <li>双击mac安装包</li>
+          <li>点击 andsec config.app</li>
+          <li>选择是否无用户模式</li>
+          <li>填入系统端口号（默认直接确定）</li>
+          <li>同级目录生成新的安装包</li>
+        </ul>
+      </div>
+      <!-- Right: 安装前设置 -->
+      <div class="card" style="margin:0;padding:16px 20px">
+        <h4>安装前设置</h4>
+        <ul class="mt-m" style="font-size:13px">
+          <li>设置安全策略宽松模式</li>
+          <li>关闭SIP</li>
+          <li>调整安全性来源为所有</li>
+          <li>允许驱动加载</li>
+        </ul>
+      </div>
+      <!-- Bottom Left: 包制作 images -->
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0">
+        <div class="img-item"><img src="images/slide14_img015.png" alt="Mac包制作1"><p class="cap">选择安装包</p></div>
+        <div class="img-item"><img src="images/slide14_img016.png" alt="Mac包制作2"><p class="cap">配置应用</p></div>
+        <div class="img-item"><img src="images/slide14_img017.png" alt="Mac包制作3"><p class="cap">选择模式</p></div>
+        <div class="img-item"><img src="images/slide14_img018.png" alt="Mac包制作4"><p class="cap">端口设置</p></div>
+      </div>
+      <!-- Bottom Right: 安装前设置 images -->
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0">
+        <div class="img-item"><img src="images/slide15_img021.jpg" alt="Mac设置1"><p class="cap">安全策略设置</p></div>
+        <div class="img-item"><img src="images/slide15_img022.png" alt="Mac设置2"><p class="cap">关闭SIP</p></div>
+        <div class="img-item"><img src="images/slide15_img023.png" alt="Mac设置3"><p class="cap">调整安全性来源</p></div>
+        <div class="img-item"><img src="images/slide15_img024.png" alt="Mac设置4"><p class="cap">允许驱动加载</p></div>
+        <div class="img-item" style="grid-column:span 2"><img src="images/slide15_img025.png" alt="Mac设置5"><p class="cap">驱动加载确认</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 13: Linux & Mobile Client -->
+  <section class="slide" data-title="Linux和手机客户端">
+    <p class="kicker">Linux & Mobile · 客户端</p>
+    <h2 class="h2">Linux客户端 & 手机客户端</h2>
+    <div class="grid g2" style="margin-top:16px;flex:1;grid-template-rows:auto 1fr;gap:12px">
+      <!-- Left: Linux客户端 -->
+      <div class="card" style="margin:0;padding:16px 20px">
+        <h4>Linux客户端</h4>
+        <div class="code-block" style="font-size:12px;margin-top:8px">uname -a  # 查看内核版本
+uname -r  # 查看操作系统
+# 安装
+sudo dpkg -i andsec_3.2.14_amd64.deb
+# 卸载
+sudo uninstall_andsec</div>
+      </div>
+      <!-- Right: 手机客户端 -->
+      <div class="card" style="margin:0;padding:16px 20px">
+        <h4>手机客户端</h4>
+        <p class="dim" style="margin-top:8px">在应用商店搜索 <span class="gradient-text">"安得卫士"</span>，即可安装</p>
+        <p class="dim mt-s">如找不到，请联系我们获取最新版本的安装包</p>
+      </div>
+      <!-- Bottom Left: Linux images -->
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0">
+        <div class="img-item" style="padding:10px"><img src="images/slide16_img026.png" style="max-height:130px" alt="Linux客户端1" onmouseover="this.style.transform='scale(3)';this.style.boxShadow='0 8px 32px rgba(0,0,0,.35)';this.style.position='relative';this.style.zIndex='10';this.style.background='var(--bg)'" onmouseout="this.style.transform='';this.style.boxShadow='';this.style.position='';this.style.zIndex='';this.style.background=''"><p class="cap">Linux安装界面</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide16_img027.png" style="max-height:130px" alt="Linux客户端2" onmouseover="this.style.transform='scale(3)';this.style.boxShadow='0 8px 32px rgba(0,0,0,.35)';this.style.position='relative';this.style.zIndex='10';this.style.background='var(--bg)'" onmouseout="this.style.transform='';this.style.boxShadow='';this.style.position='';this.style.zIndex='';this.style.background=''"><p class="cap">Linux运行界面</p></div>
+      </div>
+      <!-- Bottom Right: Mobile images -->
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0">
+        <div class="img-item" style="padding:10px"><img src="images/slide17_img028.png" style="max-height:180px;width:auto" alt="手机客户端1" onmouseover="this.style.transform='scale(3)';this.style.boxShadow='0 8px 32px rgba(0,0,0,.35)';this.style.position='relative';this.style.zIndex='10';this.style.background='var(--bg)'" onmouseout="this.style.transform='';this.style.boxShadow='';this.style.position='';this.style.zIndex='';this.style.background=''"><p class="cap">手机客户端-搜索</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide17_img029.png" style="max-height:180px;width:auto" alt="手机客户端2" onmouseover="this.style.transform='scale(3)';this.style.boxShadow='0 8px 32px rgba(0,0,0,.35)';this.style.position='relative';this.style.zIndex='10';this.style.background='var(--bg)'" onmouseout="this.style.transform='';this.style.boxShadow='';this.style.position='';this.style.zIndex='';this.style.background=''"><p class="cap">手机客户端-登录</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 14: Section 3 Divider -->
+  <section class="slide center tc" data-title="第三章">
+    <div style="max-width:900px;margin:0 auto;position:relative;z-index:1">
+      <span class="pill anim-fade-down" data-anim="fade-down" style="font-size:12px;padding:6px 16px">Chapter 03 · 第三章</span>
+      <h1 class="h1" style="font-size:68px;margin:18px 0 0">安得卫士 <span class="gradient-text">核心功能</span></h1>
+      <div class="divider-accent" style="margin:20px auto"></div>
+      <p class="lede">一个平台，多种服务</p>
+      <div style="display:flex;gap:24px;justify-content:center;margin-top:32px;flex-wrap:wrap">
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">9</div><p class="dim" style="font-size:11px;margin-top:4px">核心模块</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">7</div><p class="dim" style="font-size:11px;margin-top:4px">加密能力</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">3</div><p class="dim" style="font-size:11px;margin-top:4px">外发方案</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">∞</div><p class="dim" style="font-size:11px;margin-top:4px">可扩展</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 15: Server Platform Overview -->
+  <section class="slide" data-title="服务器平台">
+    <p class="kicker">Platform · 平台概述</p>
+    <h2 class="h2">服务器平台</h2>
+    <div class="grid g2 mt-l">
+      <div class="card anim-fade-left" data-anim="fade-left">
+        <h4>核心特性</h4>
+        <ul class="mt-m">
+          <li>统一终端认证</li>
+          <li>统一流程、日志、消息</li>
+          <li>一个客户端承载多个应用</li>
+          <li>模块化集成加密、桌管、DLP、硬盘加密、网关、中间件</li>
+        </ul>
+      </div>
+      <div class="card anim-fade-right" data-anim="fade-right">
+        <h4>管理功能</h4>
+        <ul class="mt-m">
+          <li><b>终端平台</b>：用户管理、终端管理、预警管理、任务管理、运维管理</li>
+          <li><b>服务平台</b>：流程管理、日志管理、汇总报表、策略管理、数据分析</li>
+        </ul>
+      </div>
+    </div>
+    
+  </section>
+
+  <!-- Slide 16: User Source & Roles -->
+  <section class="slide" data-title="用户来源与角色">
+    <p class="kicker">User · 用户管理</p>
+    <h2 class="h2">用户来源与角色</h2>
+    <div class="grid g2" style="margin-top:16px;flex:1;grid-template-rows:auto 1fr;gap:12px">
+      <!-- Left: 用户来源 -->
+      <div class="card" style="margin:0;padding:16px 20px">
+        <h4>用户来源</h4>
+        <ul style="margin-top:10px;font-size:13px">
+          <li><b>手动创建</b>：单个用户录入</li>
+          <li><b>批量导入</b>：Excel模板批量导入</li>
+          <li><b>第三方同步</b>：AD域、飞书、企微、钉钉、WeLink、WPS的用户组织结构，支持自动激活 / 手动激活</li>
+        </ul>
+      </div>
+      <!-- Right: 用户角色 -->
+      <div class="card" style="margin:0;padding:16px 20px">
+        <h4>用户角色</h4>
+        <p class="dim" style="margin-top:8px;font-size:13px">支持新建角色，并对角色的可视范围和功能菜单进行设置</p>
+      </div>
+      <!-- Bottom Left: images -->
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0">
+        <div class="img-item" style="padding:10px"><img src="images/slide20_img030.png" style="max-height:100px" alt="用户来源1"><p class="cap">手动创建</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide20_img031.png" style="max-height:100px" alt="用户来源2"><p class="cap">批量导入</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide20_img032.png" style="max-height:100px" alt="用户来源3"><p class="cap">第三方同步-AD域</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide20_img033.png" style="max-height:100px" alt="用户来源4"><p class="cap">第三方同步-飞书</p></div>
+      </div>
+      <!-- Bottom Right: images -->
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0">
+        <div class="img-item" style="padding:10px"><img src="images/slide21_img034.png" style="max-height:100px" alt="用户角色1"><p class="cap">角色-设置</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide21_img035.png" style="max-height:100px" alt="用户角色2"><p class="cap">角色-权限</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide21_img036.png" style="max-height:100px" alt="用户角色3"><p class="cap">角色-可视范围</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide21_img037.png" style="max-height:100px" alt="用户角色4"><p class="cap">角色-功能菜单</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 17: Encryption Overview -->
+  <section class="slide" data-title="加解密概述">
+    <p class="kicker">Encryption · 加解密</p>
+    <h2 class="h2">加解密功能概述</h2>
+    <div class="grid g2 mt-l">
+      <div class="card">
+        <h4>策略类型</h4>
+        <ul class="mt-m">
+          <li><b>自动加密</b>：透明加密，编辑保存明文后自动加密</li>
+          <li><b>手动加密</b>：半透明，编辑保存不加密，但能打开密文，支持所有软件</li>
+          <li><b>老板策略</b>：能打开加密文件，编辑保存后解密</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>核心能力</h4>
+        <ul class="mt-m">
+          <li>内置400+款软件策略库</li>
+          <li>支持按全局、部门、角色、用户定制策略</li>
+          <li>优先级从高到低：用户 > 角色 > 部门 > 全局</li>
+        </ul>
+      </div>
+    </div>
+    <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin-top:16px">
+      <div class="img-item" style="padding:10px"><img src="images/slide24_img039.png" style="max-height:130px" alt="加解密策略1"><p class="cap">加解密策略配置</p></div>
+      <div class="img-item" style="padding:10px"><img src="images/image.png" style="max-height:130px" alt="加解密策略2"><p class="cap">策略库详情</p></div>
+    </div>
+  </section>
+
+  <!-- Slide 18: Encryption Strategy Details -->
+  <section class="slide" data-title="加解密策略配置">
+    <p class="kicker">Encryption · 策略配置</p>
+    <h2 class="h2">加解密策略配置详解</h2>
+    <div class="grid g2" style="margin-top:12px;flex:1;grid-template-rows:auto 1fr;gap:12px">
+      <!-- Left: 策略表 -->
+      <div class="card" style="margin:0;padding:14px 18px">
+        <table class="t" style="font-size:13px">
+          <thead><tr><th>策略类型</th><th>说明</th><th>适用场景</th></tr></thead>
+          <tbody>
+            <tr><td><b>需hook进程</b></td><td>填写带界面的进程，对加密切换进程进行hook</td><td>实现截屏、拷贝粘贴等内容管控</td></tr>
+            <tr><td><b>应用hook进程</b></td><td>需厂商提供一线后才能配置</td><td>驱动hook异常时使用</td></tr>
+            <tr><td><b>基本类型</b></td><td>本地备份时采用</td><td>备份类型配置</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Right: 提示 -->
+      <div class="card" style="margin:0;padding:14px 18px">
+        <h4>注意事项</h4>
+        <ul style="margin-top:10px;font-size:13px">
+          <li>策略进程不全时可从常用软件库中进行调整</li>
+          <li>导入软件过度时可从常用软件库中进行回收</li>
+        </ul>
+      </div>
+      <!-- Bottom: image -->
+      <div class="img-grid" style="grid-template-columns:1fr;gap:0;margin:0;grid-column:span 2">
+        <div class="img-item" style="padding:10px"><img src="images/slide23_img038.png" style="max-height:160px;width:auto" alt="策略详情"><p class="cap">策略详情</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 19: On-Disk Encryption -->
+  <section class="slide" data-title="落地加解密">
+    <p class="kicker">Encryption · 落地加解密</p>
+    <h2 class="h2">落地加解密</h2>
+    <div style="margin-top:16px;flex:1;display:flex;flex-direction:column;gap:12px">
+      <div class="card" style="padding:20px 24px">
+        <p style="font-size:13px;line-height:1.8">落地加解密策略支持指定<strong>本地路径</strong>、<strong>移动存储设备</strong>、<strong>网络共享路径</strong>、<strong>文件类型</strong>，实现配置在策略中的关联文件保存指定路径后自动加解密。</p>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <p style="font-size:13px;margin-bottom:6px"><code>@</code> 代表移动存储设备，<code>#</code> 代表共享目录</p>
+          <p style="font-size:13px;margin-bottom:6px">默认优先级低于透明加解密策略，优先级支持调整</p>
+          <p style="font-size:13px">支持三种识别方式：<strong>路径识别</strong> · <strong>内容识别</strong> · <strong>截屏加密</strong></p>
+        </div>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr;gap:0;margin:0;flex:1">
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide26_img040.png" style="max-height:200px;width:auto" alt="落地加解密"><p class="cap">落地加解密策略配置</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 20: Security Isolation & Content Control -->
+  <section class="slide" data-title="安全隔离">
+    <p class="kicker">Security · 安全隔离</p>
+    <h2 class="h2">安全隔离</h2>
+    <div style="margin-top:16px;flex:1;display:flex;flex-direction:column;gap:12px">
+      <div class="card" style="padding:20px 24px">
+        <ul style="font-size:13px;line-height:1.8">
+          <li>一个<b>安全组 等于 一把密钥</b>，最多256个安全组</li>
+          <li>一个用户可隶属<b>多个组</b>，最多20个</li>
+          <li><b>主组</b>产生密文用此组密钥加密；<b>副组</b>支持阅读其他组密文</li>
+          <li>已加密文件流转到其他组，可选择是否改变密钥，默认不变密钥</li>
+        </ul>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0;flex:1">
+        <div class="img-item" style="padding:10px"><img src="images/slide27_img041.png" style="max-height:140px" alt="安全隔离1"><p class="cap">安全组配置</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide27_img042.png" style="max-height:140px" alt="安全隔离2"><p class="cap">截屏控制</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 21: Content Security -->
+  <section class="slide" data-title="内容安全管控">
+    <p class="kicker">Security · 内容安全管控</p>
+    <h2 class="h2">内容安全管控</h2>
+    <div style="margin-top:16px;flex:1;display:flex;flex-direction:column;gap:10px">
+      <div class="card" style="padding:16px 20px">
+        <h4>拷贝控制</h4>
+        <p class="dim" style="font-size:12px;line-height:1.6">开启后密文之间可以互相拷贝，密文无法拷贝到明文，明文可以拷贝到密文；支持关联进程例外和字符数控制设置，字符控制目前只能控制普通的文本类型，不能控制非文本类型，如图片等。<br>如控制除记事本外的其他关联进程只能向明文中拷贝200字节</p>
+      </div>
+      <div class="card" style="padding:16px 20px">
+        <h4>联网控制</h4>
+        <p class="dim" style="font-size:12px;line-height:1.6">（WPS、Office 类自带的联网外发分享功能）：开启后密文进程的软件无法通过网络传输加密文件，支持配置关联进程例外，如控制除 winword 外的其他关联进程禁止联网分享文件</p>
+      </div>
+      <div class="card" style="padding:16px 20px">
+        <h4>另存控制</h4>
+        <p class="dim" style="font-size:12px;line-height:1.6">开启后密文存储任意副本均强制加密，支持配置关联进程例外，如控制除记事本外的其他关联进程另存为全部强制加密</p>
+      </div>
+      <div class="card" style="padding:16px 20px">
+        <h4>截屏及远程控制</h4>
+        <p class="dim" style="font-size:12px;line-height:1.6">开启后在打开密文的情况下，禁止截屏/录屏/远程软件对屏幕进行截图，如除 notepad 外的其他关联进程禁止截屏及远程分享</p>
+        <p class="dim" style="font-size:12px;line-height:1.6;margin-top:4px">可通过流程审批方式在一段时间内可以投屏（即不控制）</p>
+      </div>
+      <div class="card" style="padding:16px 20px">
+        <h4>插入控制</h4>
+        <p class="dim" style="font-size:12px;line-height:1.6">开启后密文无法插入到明文或其他非受控软件中</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 20: Network Encryption - Process & Network -->
+  <section class="slide" data-title="网络透明加解密">
+    <p class="kicker">Network · 网络透明加解密</p>
+    <h2 class="h2">网络透明加解密</h2>
+    <div style="display:flex;flex-direction:column;margin-top:14px;flex:1;gap:8px">
+      <div style="font-size:13px;color:var(--text-2);line-height:1.3"><strong>区别</strong>：如通过浏览器直接读取文件，网络透明加解密(进程)就无法实现，就要使用网络透明加解密(网络)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="card" style="margin:0;padding:14px 18px;flex:none">
+            <h4 style="font-size:15px">网络透明加解密（进程）</h4>
+            <p class="dim" style="font-size:13px;margin-top:6px">上传解密下载加密（多用于浏览器），如对百度网盘上传的文件进行解密，下载的文件进行加密</p>
+          </div>
+          <div class="img-grid" style="grid-template-columns:1fr;gap:0;margin:0;flex:1">
+            <div class="img-item" style="padding:10px;height:100%"><img src="images/image copy 2.png" style="max-height:180px;width:auto" alt="进程模式"><p class="cap">网络透明加解密（进程）</p></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="card" style="margin:0;padding:14px 18px;flex:none">
+            <h4 style="font-size:15px">网络透明加解密（网络）</h4>
+            <p class="dim" style="font-size:13px;margin-top:6px">通过网络层进行透明加解密，适用于进程模式无法覆盖的场景</p>
+          </div>
+          <div class="img-grid" style="grid-template-columns:1fr;gap:0;margin:0;flex:1">
+            <div class="img-item" style="padding:10px;height:100%"><img src="images/image copy.png" style="max-height:180px;width:auto" alt="网络模式"><p class="cap">网络透明加解密（网络）</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 21: Log Control -->
+  <section class="slide" data-title="日志管控">
+    <p class="kicker">Log · 日志管控</p>
+    <h2 class="h2">日志管控</h2>
+    <div style="margin-top:12px;flex:1;display:flex;flex-direction:column;gap:8px">
+      <div class="card" style="padding:14px 18px">
+        <h4 style="margin-bottom:4px">日志记录配置</h4>
+        <p class="dim" style="font-size:13px;line-height:1.6">若配置需记录日志内容后，与明密文无关，驱动仅记录配置的文件类型的操作日志</p>
+        <ul style="margin-top:6px;font-size:13px;line-height:1.5">
+          <li>支持按文件类型配置日志记录</li>
+          <li>日志内容与明密文状态无关</li>
+          <li>驱动层自动采集操作日志</li>
+        </ul>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr;gap:0;margin:0;flex:1">
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide29_img046.png" style="max-height:200px;width:auto" alt="日志管控"><p class="cap">日志管控配置</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 21: Full Disk Scan -->
+  <section class="slide" data-title="全盘扫描">
+    <p class="kicker">Scan · 全盘扫描</p>
+    <h2 class="h2">全盘扫描加解密</h2>
+    <div style="margin-top:12px;flex:1;display:flex;flex-direction:column;gap:10px">
+      <div class="card" style="padding:14px 18px">
+        <h4>全盘扫描加解密</h4>
+        <ul style="margin-top:6px;font-size:13px;line-height:1.7">
+          <li>支持对指定机器上的指定文件类型进行全盘扫描</li>
+          <li>支持立即执行或定时执行</li>
+          <li>扫描完成后可在服务器后台查看结果</li>
+        </ul>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0;flex:1">
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide32_img049.png" style="max-height:200px;width:auto" alt="全盘扫描"><p class="cap">全盘扫描配置</p></div>
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide32_img050.png" style="max-height:200px;width:auto" alt="全盘扫描结果"><p class="cap">扫描结果查看</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 22: Network Access Control -->
+  <section class="slide" data-title="网络访问控制">
+    <p class="kicker">Network · 网络访问控制</p>
+    <h2 class="h2">网络访问控制</h2>
+    <div style="margin-top:12px;flex:1;display:flex;flex-direction:column;gap:8px">
+      <div class="card" style="padding:14px 18px">
+        <h4>进程只能访问指定地址</h4>
+        <p class="dim" style="font-size:12px;line-height:1.6;margin-top:4px">表示进程列表中进程只能访问指定地址，此进程不允许再访问其他地址</p>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <h4>进程不能访问指定地址</h4>
+        <p class="dim" style="font-size:12px;line-height:1.6;margin-top:4px">表示进程列表中指定进程不能访问指定地址，但可以访问其他地址</p>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <h4>地址只能被指定进程访问</h4>
+        <p class="dim" style="font-size:12px;line-height:1.6;margin-top:4px">表示地址中设置的网络路径只能被指定进程列表中进程访问，未设置的进程不能访问此网络路径</p>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <h4>指定的地址不能被指定进程访问</h4>
+        <p class="dim" style="font-size:12px;line-height:1.6;margin-top:4px">表示进程列表中设置的进程不能访问设置的网络路径；如果进程列表设置为空，则表示所有的进程都不能访问地址中设置的网络路径</p>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <h4>进程与地址一一对应</h4>
+        <p class="dim" style="font-size:12px;line-height:1.6;margin-top:4px">指定进程只能访问指定网络，指定网络也不能被其他进程访问</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 22: Backup -->
+  <section class="slide" data-title="备份功能">
+    <p class="kicker">Backup · 备份</p>
+    <h2 class="h2">本地备份 & 远程备份</h2>
+    <div class="grid g2" style="margin-top:16px;flex:1;grid-template-rows:auto 1fr;gap:12px">
+      <div class="card" style="margin:0;padding:14px 18px">
+        <h4 style="font-size:15px">本地备份</h4>
+        <ul style="margin-top:6px;font-size:13px;line-height:1.7">
+          <li>打开密文时备份，一天只备份一次，备份到本地</li>
+          <li>每个文件最多备份3份</li>
+          <li>备份文件类型为软件中配置的基本类型/文件类型</li>
+        </ul>
+      </div>
+      <div class="card" style="margin:0;padding:14px 18px">
+        <h4 style="font-size:15px">远程备份 <span style="font-size:11px;color:var(--accent);font-weight:400"></span></h4>
+        <ul style="margin-top:6px;font-size:13px;line-height:1.7">
+          <li>根据配置的文件类型、时间进行备份到服务器</li>
+          <li>支持断点续传，也支持备份3份</li>
+          <li>支持服务器后台预览、下载 <span style="font-size:11px;color:var(--accent)"></span></li>
+        </ul>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0;grid-column:1 / -1">
+        <div class="img-item" style="padding:10px"><img src="images/slide33_img051.png" style="max-height:130px" alt="本地备份"><p class="cap">本地备份配置</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide34_img053.png" style="max-height:130px" alt="远程备份"><p class="cap">远程备份配置</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide34_img055.png" style="max-height:130px" alt="远程备份2"><p class="cap">远程备份详情</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 23: Flow Management -->
+  <section class="slide" data-title="流程管理">
+    <p class="kicker">Flow · 流程管理</p>
+    <h2 class="h2">流程管理</h2>
+    <div class="grid g2" style="margin-top:16px;flex:1;grid-template-rows:auto 1fr;gap:12px">
+      <div class="card" style="margin:0;padding:14px 18px">
+        <h4>流程配置</h4>
+        <ul style="margin-top:8px;font-size:13px;line-height:1.7">
+          <li>支持根据计算机名、IP分类提交流程</li>
+          <li>支持根据文件类型分类审批</li>
+          <li>支持自动审批和自审批</li>
+          <li>支持代办、会签、强制结束、批量审批</li>
+          <li>支持流程附件在线预览 <span style="font-size:11px;color:var(--accent)"></span></li>
+        </ul>
+      </div>
+      <div class="card" style="margin:0;padding:14px 18px">
+        <h4>自定义流程</h4>
+        <ul style="margin-top:8px;font-size:13px;line-height:1.7">
+          <li>同一流程类型支持多个模板</li>
+          <li>不同模板配置不同流程级别</li>
+          <li>支持配置不同用户走不同模板</li>
+        </ul>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0">
+        <div class="img-item" style="padding:10px"><img src="images/slide35_img056.png" style="max-height:120px" alt="流程配置1"><p class="cap">流程配置-提交流程</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide35_img057.png" style="max-height:120px" alt="流程配置2"><p class="cap">流程配置-审批设置</p></div>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0">
+        <div class="img-item" style="padding:10px"><img src="images/slide36_img058.png" style="max-height:120px" alt="自定义流程1"><p class="cap">自定义流程-模板</p></div>
+        <div class="img-item" style="padding:10px"><img src="images/slide36_img059.png" style="max-height:120px" alt="自定义流程2"><p class="cap">自定义流程-级别</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 24: External Cloud Box -->
+  <section class="slide" data-title="外发云盒">
+    <p class="kicker">External · 外发云盒</p>
+    <h2 class="h2">外发云盒</h2>
+    <div style="margin-top:12px;flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;gap:10px">
+      <div class="card" style="margin:0;padding:14px 18px">
+        <h4>制作方式</h4>
+        <ul style="margin-top:6px;font-size:13px;line-height:1.7">
+          <li>支持本地制作或流程制作</li>
+          <li>支持制作exe格式外发文件</li>
+        </ul>
+          <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 0 0">
+          <div class="img-item" style="padding:6px"><img src="images/slide40_img063.png" style="max-height:150px;width:auto" alt="外发制作1"><p class="cap">制作配置</p></div>
+          <div class="img-item" style="padding:6px"><img src="images/slide40_img064.png" style="max-height:150px;width:auto" alt="外发制作2"><p class="cap">制作流程</p></div>
+        </div>
+      </div>
+      <div class="card" style="margin:0;padding:14px 18px">
+        <h4>权限与记录</h4>
+        <ul style="margin-top:6px;font-size:13px;line-height:1.7">
+          <li><b>在线权限</b>：必须从服务器获取最新权限</li>
+          <li><b>离线权限</b>：无法连接时通过离线权限打开</li>
+          <li>支持在线回收权限、禁用外发文件</li>
+        </ul>
+        <div class="img-grid" style="grid-template-columns:1fr;gap:6px;margin:16px 0 0 0">
+          <div class="img-item" style="padding:6px"><img src="images/slide41_img065.png" style="max-height:150px;width:auto" alt="外发记录"><p class="cap">外发记录</p></div>
+        </div>
+      </div>
+      <div class="img-grid" style="grid-template-columns:repeat(4,1fr);gap:8px;margin:0;grid-column:1 / -1">
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide42_img066.png" style="max-height:160px;width:auto" alt="外发打开1"><p class="cap">接受文件</p></div>
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide42_img067.png" style="max-height:160px;width:auto" alt="外发打开2"><p class="cap">输入密码</p></div>
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide42_img068.png" style="max-height:160px;width:auto" alt="外发打开3"><p class="cap">验证权限</p></div>
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide42_img069.png" style="max-height:160px;width:auto" alt="外发打开4"><p class="cap">查看文件</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 25: Watermark & Print Control -->
+  <section class="slide" data-title="水印与打印管控">
+    <p class="kicker">Watermark & Print · 水印与打印</p>
+    <h2 class="h2">水印管控 & 打印管控</h2>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;gap:10px;align-content:center;padding:20px 0">
+      <div class="card" style="margin:0;padding:10px 14px">
+        <h4>水印管控</h4>
+        <div style="margin-top:4px;font-size:12px;line-height:1.5">
+          <p><b>屏幕水印</b>：支持多个屏幕</p>
+          <p><b>文档水印</b>：写入文档中，解密后水印依然存在</p>
+        </div>
+      </div>
+      <div class="card" style="margin:0;padding:10px 14px">
+        <h4>打印管控</h4>
+        <ul style="margin-top:4px;font-size:12px;line-height:1.5">
+          <li>打印审计设置</li>
+          <li>虚拟打印控制</li>
+          <li>物理打印控制</li>
+          <li>打印水印（支持二维码水印，<span style="color:var(--accent)">6.0.8 新增</span>）</li>
+        </ul>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0">
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide43_img070.png" style="max-height:220px;width:auto" alt="屏幕水印"><p class="cap">屏幕水印</p></div>
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide43_img071.png" style="max-height:220px;width:auto" alt="文档水印"><p class="cap">文档水印</p></div>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr;gap:8px;margin:0">
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide45_img072.png" style="max-height:220px;width:auto" alt="打印管控"><p class="cap">打印管控配置</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 26: Email Control -->
+  <section class="slide" data-title="邮件管控">
+    <p class="kicker">Email · 邮件管控</p>
+    <h2 class="h2">邮件管控</h2>
+    <div class="grid g2 mt-l">
+      <div class="card anim-fade-left" data-anim="fade-left">
+        <h4>邮件审计选项</h4>
+        <ul class="mt-m">
+          <li><b>全审计</b>：发送的邮件全部记录</li>
+          <li><b>带附件审计</b>：只记录带附件的邮件</li>
+          <li><b>带密文附件审计</b>：只记录带密文附件的邮件</li>
+        </ul>
+      </div>
+      <div class="card anim-fade-right" data-anim="fade-right">
+        <h4>邮件审批流程</h4>
+        <ul class="mt-m">
+          <li><b>全审批</b>：所有邮件走审批流程</li>
+          <li><b>带附件审批</b>：带附件邮件才审批</li>
+          <li><b>带密文附件审批</b>：带密文附件才审批</li>
+        </ul>
+      </div>
+    </div>
+    <p class="dim mt-l">支持foxmail、Outlook邮件客户端 | 支持解密白名单、审批白名单</p>
+  </section>
+
+  <!-- Slide 27: Sandbox -->
+  <section class="slide" data-title="沙盒管控">
+    <p class="kicker">Sandbox · 沙盒</p>
+    <h2 class="h2">沙盒管控</h2>
+    <div style="flex:1;display:grid;grid-template-rows:auto 1fr;gap:4px;margin-top:-8px">
+      <div class="card" style="padding:6px 10px">
+        <p style="font-size:12px"><b>管控效果：</b>沙盒内明文运行，导出强制加密；必须配置可信进程；支持沙盒内文件传输、审计导出、流程审批导出</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:6px">
+        <div class="card" style="padding:6px 8px;display:flex;flex-direction:column">
+          <h4 style="font-size:12px">创建</h4>
+          <p class="dim" style="font-size:11px;line-height:1.4;margin-top:1px">服务器下发策略后，客户端提示创建沙盒管控，用户调整路径、盘符、容量、备份路径</p>
+          <div class="img-grid" style="grid-template-columns:1fr;gap:2px;margin:4px 0 0 0;margin-top:auto"><div class="img-item" style="padding:2px"><img src="images/slide49_img085.png" style="max-height:100px;width:auto" alt="创建"><p class="cap" style="font-size:10px">创建沙盒</p></div></div>
+        </div>
+        <div class="card" style="padding:6px 8px;display:flex;flex-direction:column">
+          <h4 style="font-size:12px">文件导出</h4>
+          <p class="dim" style="font-size:11px;line-height:1.4;margin-top:1px">导出的文件是密文，如需部署或执行，需走一次解密申请流程</p>
+          <div class="img-grid" style="grid-template-columns:1fr;gap:2px;margin:4px 0 0 0;margin-top:auto"><div class="img-item" style="padding:2px"><img src="images/slide50_img090.png" style="max-height:100px;width:auto" alt="文件导出"><p class="cap" style="font-size:10px">文件导出</p></div></div>
+        </div>
+        <div class="card" style="padding:6px 8px;display:flex;flex-direction:column">
+          <h4 style="font-size:12px">文件导入沙盒</h4>
+          <ul style="margin-top:1px;font-size:11px;line-height:1.4;padding-left:14px">
+            <li>导入本地的代码文件</li>
+            <li>从SVN/Git下载代码到沙盒</li>
+            <li>独立虚拟盘符，与本地不同步</li>
+          </ul>
+          <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:2px;margin:4px 0 0 0;margin-top:auto">
+            <div class="img-item" style="padding:2px"><img src="images/slide49_img086.png" style="max-height:90px;width:auto" alt="导入1"><p class="cap" style="font-size:9px">本地导入</p></div>
+            <div class="img-item" style="padding:2px"><img src="images/slide50_img087.png" style="max-height:90px;width:auto" alt="导入2"><p class="cap" style="font-size:9px">SVN/Git导入</p></div>
+          </div>
+        </div>
+        <div class="card" style="padding:6px 8px;display:flex;flex-direction:column">
+          <h4 style="font-size:12px">审计导出 · 流程审批导出</h4>
+          <ul style="margin-top:1px;font-size:11px;line-height:1.4;padding-left:14px">
+            <li>可执行文件直接明文导出，记录审计</li>
+            <li>流程申请通过后以明文导出</li>
+          </ul>
+          <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:2px;margin:4px 0 0 0;margin-top:auto">
+            <div class="img-item" style="padding:2px"><img src="images/slide51_img093.png" style="max-height:90px;width:auto" alt="审计"><p class="cap" style="font-size:9px">审计导出</p></div>
+            <div class="img-item" style="padding:2px"><img src="images/slide51_img094.png" style="max-height:90px;width:auto" alt="审批"><p class="cap" style="font-size:9px">审批导出</p></div>
+          </div>
+        </div>
+        <div class="card" style="padding:6px 8px;display:flex;flex-direction:column">
+          <h4 style="font-size:12px">在沙盒内打开项目</h4>
+          <ul style="margin-top:1px;font-size:11px;line-height:1.4;padding-left:14px">
+            <li>右键选择编译器打开项目</li>
+            <li>先打开编译器，再打开沙盒项目（需配置可信进程）</li>
+          </ul>
+          <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:2px;margin:4px 0 0 0;margin-top:auto">
+            <div class="img-item" style="padding:2px"><img src="images/slide50_img088.png" style="max-height:90px;width:auto" alt="打开1"><p class="cap" style="font-size:9px">右键打开</p></div>
+            <div class="img-item" style="padding:2px"><img src="images/slide50_img089.png" style="max-height:90px;width:auto" alt="打开2"><p class="cap" style="font-size:9px">编译器打开</p></div>
+          </div>
+        </div>
+        <div class="card" style="padding:6px 8px;display:flex;flex-direction:column">
+          <h4 style="font-size:12px">文件传输</h4>
+          <ul style="margin-top:1px;font-size:11px;line-height:1.4;padding-left:14px">
+            <li>沙盒与沙盒之间文件传输</li>
+            <li>沙盒文件导出到共享文件夹</li>
+          </ul>
+          <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:2px;margin:4px 0 0 0;margin-top:auto">
+            <div class="img-item" style="padding:2px"><img src="images/slide51_img091.png" style="max-height:90px;width:auto" alt="传输1"><p class="cap" style="font-size:9px">沙盒间传输</p></div>
+            <div class="img-item" style="padding:2px"><img src="images/slide51_img092.png" style="max-height:90px;width:auto" alt="传输2"><p class="cap" style="font-size:9px">共享导出</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 28: Permission File -->
+  <section class="slide" data-title="权限文件">
+    <p class="kicker">Permission · 文件权限</p>
+    <h2 class="h2">文件权限管控</h2>
+    <div style="margin-top:8px;flex:1;display:flex;flex-direction:column;gap:8px;font-size:12px">
+      <div class="card" style="padding:10px 14px">
+        <p>支持针对不同文档级别、文档授权访问进行权限设置及访问控制。</p>
+        <h4 style="font-size:13px;margin-top:8px">权限类型说明</h4>
+        <ul style="margin-top:4px;font-size:11px;line-height:1.6;padding-left:16px">
+          <li><b>只读</b>：仅允许查看文档内容，禁止编辑、打印、复制</li>
+          <li><b>编辑</b>：允许修改文档内容，保存后自动加密</li>
+          <li><b>阅读次数</b>：限制文档可打开阅读的次数，到期自动失效</li>
+          <li><b>打印</b>：允许打印文档，打印自动添加溯源水印</li>
+          <li><b>打印次数</b>：限制文档可打印的次数，超限自动禁止</li>
+          <li><b>复制</b>：允许复制文档内容，支持剪贴板管控</li>
+        </ul>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="card" style="padding:10px 14px">
+            <h4 style="font-size:13px">模板化授权</h4>
+            <p class="dim" style="font-size:11px;line-height:1.5;margin-top:2px">按用户/部门授权 · 按密级模板授权</p>
+            <p class="dim" style="font-size:11px;line-height:1.5">通过权限模板给不同用户、部门进行文档授权；根据不同密级模板给文件授予不同密级</p>
+            <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:4px;margin:6px 0 0 0">
+              <div class="img-item" style="padding:4px"><img src="images/1.png" style="max-height:110px;width:auto" alt="模板1"><p class="cap" style="font-size:9px">模板授权-用户</p></div>
+              <div class="img-item" style="padding:4px"><img src="images/3.png" style="max-height:110px;width:auto" alt="模板2"><p class="cap" style="font-size:9px">模板授权-密级</p></div>
+            </div>
+          </div>
+          <div class="card" style="padding:10px 14px">
+            <h4 style="font-size:13px">密级管控</h4>
+            <p class="dim" style="font-size:11px;line-height:1.5;margin-top:2px">用户级别映射 · 密级自动匹配</p>
+            <p class="dim" style="font-size:11px;line-height:1.5">根据用户级别与文档密级关系，自动控制密级文件访问权限，实现分级管控</p>
+            <div class="img-grid" style="grid-template-columns:1fr;gap:4px;margin:6px 0 0 0">
+              <div class="img-item" style="padding:4px"><img src="images/image copy 3.png" style="max-height:110px;width:auto" alt="密级管控"><p class="cap" style="font-size:9px">密级映射</p></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="card" style="padding:10px 14px">
+            <h4 style="font-size:13px">特权还原</h4>
+            <p class="dim" style="font-size:11px;line-height:1.5;margin-top:2px">特权直接还原 · 作者还原/申请</p>
+            <p class="dim" style="font-size:11px;line-height:1.5">支持文件特权直接还原、作者还原、还原申请，确保权限变更可追溯、可审计</p>
+            <div class="img-grid" style="grid-template-columns:1fr;gap:4px;margin:6px 0 0 0">
+              <div class="img-item" style="padding:4px"><img src="images/2.png" style="max-height:110px;width:auto" alt="特权还原"><p class="cap" style="font-size:9px">特权还原</p></div>
+            </div>
+          </div>
+          <div class="card" style="padding:10px 14px">
+            <h4 style="font-size:13px">权限申请与修改</h4>
+            <p class="dim" style="font-size:11px;line-height:1.5;margin-top:2px">在线权限申请 · 权限灵活修改</p>
+            <p class="dim" style="font-size:11px;line-height:1.5">支持权限在线申请、审批后自动授权；支持已授权权限的灵活修改与调整</p>
+            <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:4px;margin:6px 0 0 0">
+              <div class="img-item" style="padding:4px"><img src="images/4.png" style="max-height:110px;width:auto" alt="申请"><p class="cap" style="font-size:9px">权限申请</p></div>
+              <div class="img-item" style="padding:4px"><img src="images/5.png" style="max-height:110px;width:auto" alt="修改"><p class="cap" style="font-size:9px">权限修改</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 28: DLP -->
+  <section class="slide" data-title="DLP数据防泄露">
+    <p class="kicker">DLP · 数据防泄露</p>
+    <h2 class="h2">DLP数据防泄露</h2>
+    <div style="margin-top:8px;flex:1;display:flex;flex-direction:column;gap:6px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="card" style="margin:0;padding:10px 14px">
+          <h4 style="font-size:13px">内置能力</h4>
+          <ul style="margin-top:4px;font-size:12px;line-height:1.5">
+            <li>关键词库、文件类型库、正则表达式库</li>
+            <li>文件指纹（机器学习）</li>
+          </ul>
+        </div>
+        <div class="card" style="margin:0;padding:10px 14px">
+          <h4 style="font-size:13px">检测与识别</h4>
+          <ul style="margin-top:4px;font-size:12px;line-height:1.5">
+            <li>关键字、正则表达式、文件属性、文件指纹</li>
+            <li>支持权重积分、忽略大小写、简繁体</li>
+            <li>嵌入图片识别、文件变动监控</li>
+          </ul>
+        </div>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr 1fr;gap:6px;margin:0;flex:1">
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide69_img144.png" style="max-height:180px;width:auto" alt="内置库"><p class="cap">关键词库/文件类型库</p></div>
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide70_img148.png" style="max-height:180px;width:auto" alt="文件指纹"><p class="cap">文件指纹</p></div>
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide71_img149.png" style="max-height:180px;width:auto" alt="通用策略"><p class="cap">通用策略</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 29: Gateway -->
+  <section class="slide" data-title="网关">
+    <p class="kicker">Gateway · 网关</p>
+    <h2 class="h2">网关部署模式</h2>
+    <div style="margin-top:10px;flex:1;display:flex;flex-direction:column;gap:8px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div class="card" style="margin:0;padding:14px 16px">
+          <h4>旁路-反向代理</h4>
+          <p class="dim" style="font-size:13px;line-height:1.6;margin-top:4px">优点：不需要打乱现有网络<br>缺点：改变访问习惯<br>访问：网关地址+端口</p>
+        </div>
+        <div class="card" style="margin:0;padding:14px 16px">
+          <h4>旁路-策略路由</h4>
+          <p class="dim" style="font-size:13px;line-height:1.6;margin-top:4px">优点：不改变访问方式<br>缺点：配置难度较高<br>访问：业务系统真实地址</p>
+        </div>
+        <div class="card" style="margin:0;padding:14px 16px">
+          <h4>串联</h4>
+          <p class="dim" style="font-size:13px;line-height:1.6;margin-top:4px">优点：不改变访问方式<br>缺点：需要改变原有网络环境<br>访问：业务系统真实地址</p>
+        </div>
+      </div>
+      <div class="img-grid" style="grid-template-columns:repeat(4,1fr);gap:6px;margin:0;flex:1">
+        <div class="img-item" style="padding:6px;height:100%"><img src="images/slide61_img108.png" style="max-height:150px;width:auto" alt="配置1"><p class="cap">网络配置</p></div>
+        <div class="img-item" style="padding:6px;height:100%"><img src="images/slide61_img109.png" style="max-height:150px;width:auto" alt="配置2"><p class="cap">端口配置</p></div>
+        <div class="img-item" style="padding:6px;height:100%"><img src="images/slide61_img110.png" style="max-height:150px;width:auto" alt="配置3"><p class="cap">证书配置</p></div>
+        <div class="img-item" style="padding:6px;height:100%"><img src="images/slide61_img111.png" style="max-height:260px;width:auto" alt="配置4"><p class="cap">部署完成</p></div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- Slide 30: Desktop Management 1 - Media & Device -->
+  <section class="slide" data-title="介质管控">
+    <p class="kicker">Desktop · 介质 & 设备管控</p>
+    <h2 class="h2">介质管控 & 设备管控</h2>
+    <div style="margin-top:10px;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <!-- Left: 介质管控 -->
+      <div style="display:flex;flex-direction:column;gap:10px;min-height:0">
+        <div class="card" style="margin:0;padding:12px 16px;display:flex;flex-direction:column;gap:6px;border-left:4px solid #3b82f6">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-size:16px;flex-shrink:0">💾</span>
+            <h4 style="font-size:16px;margin:0;flex:1">介质管控</h4>
+            <span class="pill info" style="font-size:10px">3 权限</span>
+          </div>
+          <p class="dim" style="font-size:13px;line-height:1.4;margin:0">注册/未注册介质，权限设置：<b>禁用</b>、<b>完全控制</b>、<b>只读</b></p>
+        </div>
+        <div class="img-item" style="padding:8px;flex:1;min-height:130px"><img src="images/slide63_img114.png" style="max-height:200px;width:auto" alt="介质管控"><p class="cap">介质管控配置</p></div>
+      </div>
+      <!-- Right: 设备管控 -->
+      <div style="display:flex;flex-direction:column;gap:10px;min-height:0">
+        <div class="card" style="margin:0;padding:12px 16px;display:flex;flex-direction:column;gap:6px;border-left:4px solid #10b981">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:16px;flex-shrink:0">🔌</span>
+            <h4 style="font-size:16px;margin:0;flex:1">设备管控</h4>
+            <span class="pill ok" style="font-size:10px">黑白名单</span>
+          </div>
+          <p class="dim" style="font-size:13px;line-height:1.4;margin:0">对USB设备、外设等进行统一管控，支持黑白名单策略</p>
+        </div>
+        <div class="img-item" style="padding:8px;flex:1;min-height:130px"><img src="images/image copy 8.png" style="max-height:200px;width:auto" alt="设备管控"><p class="cap">设备管控配置</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 31: Desktop Management 2 - Software & Asset -->
+  <section class="slide" data-title="软件管理">
+    <p class="kicker">Desktop · 软件 & 资产管理</p>
+    <h2 class="h2">软件管理 & 资产管理</h2>
+    <div style="margin-top:10px;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <!-- Left: 软件管理 -->
+      <div style="display:flex;flex-direction:column;gap:10px;min-height:0">
+        <div class="card" style="margin:0;padding:12px 16px;display:flex;flex-direction:column;gap:6px;border-left:4px solid #8b5cf6">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;font-size:16px;flex-shrink:0">📦</span>
+            <h4 style="font-size:16px;margin:0;flex:1">软件管理</h4>
+            <span class="pill" style="background:color-mix(in srgb,#8b5cf6 14%,transparent);color:#8b5cf6;border-color:color-mix(in srgb,#8b5cf6 30%,transparent);font-size:10px">3 系统</span>
+          </div>
+          <p class="dim" style="font-size:13px;line-height:1.4;margin:0">支持 <b>Win11 / Win10 / Win7</b> 系统分发，<b>exe / msi / zip</b> 等格式</p>
+        </div>
+        <div class="img-item" style="padding:8px;flex:1;min-height:130px"><img src="images/slide64_img119.png" style="max-height:200px;width:auto" alt="软件管理"><p class="cap">软件管理</p></div>
+      </div>
+      <!-- Right: 资产管理 -->
+      <div style="display:flex;flex-direction:column;gap:10px;min-height:0">
+        <div class="card" style="margin:0;padding:12px 16px;display:flex;flex-direction:column;gap:6px;border-left:4px solid #f59e0b">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:16px;flex-shrink:0">📊</span>
+            <h4 style="font-size:16px;margin:0;flex:1">资产管理</h4>
+            <span class="pill warn" style="font-size:10px">5 类资产</span>
+          </div>
+          <p class="dim" style="font-size:13px;line-height:1.4;margin:0">采集 <b>硬件 / 软件 / 用户组 / 系统服务 / 启动项</b></p>
+        </div>
+        <div class="img-item" style="padding:8px;flex:1;min-height:130px"><img src="images/slide65_img124.png" style="max-height:200px;width:auto" alt="资产管理"><p class="cap">资产管理</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 32: Desktop Management 3 - Remote Control & Screen -->
+  <section class="slide" data-title="远程控制">
+    <p class="kicker">Desktop · 远程 & 屏幕监控</p>
+    <h2 class="h2">远程控制 & 屏幕监控</h2>
+    <div style="margin-top:12px;flex:1;display:flex;flex-direction:column;gap:10px">
+      <div class="card card-accent" style="margin:0;padding:12px 18px;display:flex;align-items:center;gap:14px">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;font-size:18px;flex-shrink:0">🖥️</span>
+        <p class="dim" style="font-size:13px;line-height:1.5;margin:0;flex:1">实时远程操控 · <b>多屏幕监控</b> · <b>自动录屏</b></p>
+        <span class="pill info" style="font-size:10px">3 大能力</span>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0;flex:1">
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide67_img136.png" style="max-height:200px;width:auto" alt="远程控制"><p class="cap">远程控制</p></div>
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide67_img137.png" style="max-height:200px;width:auto" alt="屏幕监控"><p class="cap">屏幕监控</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 33: Desktop Management 4 - Internet Behavior -->
+  <section class="slide" data-title="上网行为">
+    <p class="kicker">Desktop · 上网行为</p>
+    <h2 class="h2">上网行为管控</h2>
+    <div style="margin-top:12px;flex:1;display:flex;flex-direction:column;gap:10px">
+      <div class="card card-accent" style="margin:0;padding:12px 18px;display:flex;align-items:center;gap:14px">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;font-size:18px;flex-shrink:0">🌐</span>
+        <p class="dim" style="font-size:13px;line-height:1.5;margin:0;flex:1">对终端上网行为进行管控，支持 <b>URL 黑白名单</b>、<b>应用协议控制</b>、<b>流量管控</b> 等</p>
+        <span class="pill" style="background:color-mix(in srgb,#8b5cf6 14%,transparent);color:#8b5cf6;border-color:color-mix(in srgb,#8b5cf6 30%,transparent);font-size:10px">3 大维度</span>
+      </div>
+      <div class="img-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin:0;flex:1">
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/image copy 4.png" style="max-height:180px;width:auto" alt="策略1"><p class="cap">上网策略</p></div>
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/image copy 5.png" style="max-height:180px;width:auto" alt="策略2"><p class="cap">应用控制</p></div>
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/image copy 6.png" style="max-height:180px;width:auto" alt="策略3"><p class="cap">流量管控</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 31: Hard Disk Encryption -->
+  <section class="slide" data-title="硬盘加密">
+    <p class="kicker">Disk · 硬盘加密</p>
+    <h2 class="h2">硬盘加密</h2>
+    <div style="margin-top:12px;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start">
+      <div class="card" style="margin:0;padding:12px 14px">
+        <h4 style="font-size:13px">超级口令</h4>
+        <p class="dim" style="font-size:12px;line-height:1.5;margin-top:2px">管理员可通过 administrator 输入超级口令进入急救系统</p>
+      </div>
+      <div class="card" style="margin:0;padding:12px 14px">
+        <h4 style="font-size:13px">自动登录</h4>
+        <p class="dim" style="font-size:12px;line-height:1.5;margin-top:2px">无显示屏服务器场景</p>
+      </div>
+      <div class="card" style="margin:0;padding:12px 14px">
+        <h4 style="font-size:13px">内部统一密码</h4>
+        <p class="dim" style="font-size:12px;line-height:1.5;margin-top:2px">流动资产场景，统一密码登录</p>
+      </div>
+      <div class="card" style="margin:0;padding:12px 14px">
+        <h4 style="font-size:13px">加密分区</h4>
+        <p class="dim" style="font-size:12px;line-height:1.5;margin-top:2px">支持全硬盘、仅系统盘、仅数据盘</p>
+      </div>
+      <div class="card" style="margin:0;padding:12px 14px;grid-column:1 / -1">
+        <h4 style="font-size:13px">联系方式</h4>
+        <p class="dim" style="font-size:12px;line-height:1.5;margin-top:2px">丢失设备在硬盘加密登录界面显示联系人信息</p>
+      </div>
+      <div class="card" style="margin:0;padding:12px 14px;border-color:var(--bad);grid-column:1 / -1">
+        <p class="dim" style="font-size:12px;line-height:1.5;color:var(--bad)"><b>注意：</b>网络盘硬盘加密，一旦开启加密或解密后，无法停止加解密操作</p>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0;grid-column:1 / -1">
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide58_img103.png" style="max-height:160px;width:auto" alt="策略"><p class="cap">硬盘加密策略</p></div>
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide59_img104.png" style="max-height:160px;width:auto" alt="上报1"><p class="cap">终端上报-状态</p></div>
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide59_img105.png" style="max-height:160px;width:auto" alt="上报2"><p class="cap">终端上报-进度</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 32: Section 4 Divider -->
+  <section class="slide center tc" data-title="第四章">
+    <div style="max-width:900px;margin:0 auto;position:relative;z-index:1">
+      <span class="pill anim-fade-down" data-anim="fade-down" style="font-size:12px;padding:6px 16px">Chapter 04 · 第四章</span>
+      <h1 class="h1" style="font-size:68px;margin:18px 0 0">常见问题 · <span class="gradient-text">案例分析</span></h1>
+      <div class="divider-accent" style="margin:20px auto"></div>
+      <p class="lede">驱动篇 · 终端篇 · 加密逻辑篇 · HOOK篇</p>
+      <div style="display:flex;gap:24px;justify-content:center;margin-top:32px;flex-wrap:wrap">
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">4</div><p class="dim" style="font-size:11px;margin-top:4px">章节</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">6</div><p class="dim" style="font-size:11px;margin-top:4px">问题类型</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">4</div><p class="dim" style="font-size:11px;margin-top:4px">调试工具</p></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div class="gradient-text" style="font-size:36px;font-weight:700;line-height:1">2</div><p class="dim" style="font-size:11px;margin-top:4px">案例</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 33: Driver Replacement -->
+  <section class="slide" data-title="驱动替换">
+    <p class="kicker">Driver · 替换说明</p>
+    <h2 class="h2">驱动替换说明</h2>
+    <div style="margin-top:12px;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card" style="margin:0;padding:14px 16px;flex:1;display:flex;flex-direction:column;justify-content:center">
+          <h4>驱动版本说明</h4>
+          <p class="dim" style="font-size:12px;line-height:1.5;margin-top:4px">驱动分为 release 和 debug 两个版本，debug 版本分为 2 种：</p>
+          <ul style="font-size:12px;line-height:1.6;margin-top:6px;padding-left:16px">
+            <li><b>debug 版本</b>：配合 DebugView 工具抓取，日志实时刷新，推荐使用</li>
+            <li><b>debugfile 版本</b>：日志直接写入文件，目录 C:\Program Files (x86)\iAndSec\FileShield\DmpDbg，适合偶现问题，复现后提取日志</li>
+          </ul>
+        </div>
+        <div class="card" style="margin:0;padding:14px 16px;flex:1;display:flex;flex-direction:column;justify-content:center">
+          <h4>替换方法</h4>
+          <ol style="font-size:12px;line-height:1.7;margin-top:6px;padding-left:16px">
+            <li>将原来的驱动 MonSafe.sys 改名</li>
+            <li>选择对应操作系统的驱动版本（win11 使用 win10 的驱动），拷贝到 C:\Windows\System32\drivers 下，改名 MonSafe.sys</li>
+            <li>重启电脑</li>
+          </ol>
+        </div>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr;gap:0;margin:0">
+        <div class="img-item" style="padding:12px;height:100%"><img src="images/slide77_img162.png" style="max-height:360px;width:auto" alt="替换说明"><p class="cap">驱动替换说明</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 34: Start/Stop Driver -->
+  <section class="slide" data-title="启停驱动">
+    <p class="kicker">Driver · 启停驱动</p>
+    <h2 class="h2">启停驱动</h2>
+    <div style="margin-top:12px;flex:1;display:flex;flex-direction:column;gap:10px">
+      <div class="card" style="margin:0;padding:10px 14px">
+        <p class="dim" style="font-size:12px">通过命令行或管理工具启动/停止驱动服务，用于调试和故障排查</p>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0;flex:1">
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide78_img163.png" style="max-height:220px;width:auto" alt="启停1"><p class="cap">启停驱动-服务</p></div>
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide78_img164.png" style="max-height:220px;width:auto" alt="启停2"><p class="cap">启停驱动-命令</p></div>
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide78_img165.png" style="max-height:220px;width:auto" alt="启停3"><p class="cap">启停驱动-状态</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 35: View Status -->
+  <section class="slide" data-title="查看状态">
+    <p class="kicker">Driver · 查看状态</p>
+    <h2 class="h2">查看驱动状态</h2>
+    <div style="margin-top:10px;flex:1;display:flex;flex-direction:column;gap:8px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="card" style="margin:0;padding:10px 14px">
+          <p class="dim" style="font-size:13px;line-height:1.5">查看驱动运行状态、版本信息、加载情况，确认驱动正常工作</p>
+        </div>
+        <div class="card" style="margin:0;padding:10px 14px">
+          <h4 style="font-size:14px">注意事项</h4>
+          <ul style="font-size:12px;line-height:1.5;margin-top:2px;padding-left:14px">
+            <li>驱动被杀毒隔离（如天擎），需加入白名单</li>
+            <li>driver 目录只读</li>
+            <li>与其他安全防护软件冲突（如腾讯 AcecheatExpert 防护）</li>
+          </ul>
+        </div>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0;flex:1">
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide79_img166.png" style="max-height:200px;width:auto" alt="状态1"><p class="cap">驱动状态-概览</p></div>
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide79_img167.png" style="max-height:200px;width:auto" alt="状态2"><p class="cap">驱动状态-版本</p></div>
+        <div class="img-item" style="padding:10px;height:100%"><img src="images/slide79_img168.png" style="max-height:200px;width:auto" alt="状态3"><p class="cap">驱动状态-加载</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 36: Blue Screen Issues -->
+  <section class="slide" data-title="蓝屏问题">
+    <p class="kicker">Driver · 蓝屏问题</p>
+    <h2 class="h2">蓝屏问题排查</h2>
+    <div style="margin-top:10px;flex:1;display:flex;flex-direction:column;gap:8px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="card" style="margin:0;padding:8px 12px">
+          <h4 style="font-size:14px">常见原因</h4>
+          <ul style="font-size:13px;line-height:1.5;margin-top:2px;padding-left:16px">
+            <li>驱动版本与操作系统不匹配</li>
+            <li>驱动文件损坏或替换不当</li>
+            <li>与第三方软件冲突</li>
+          </ul>
+        </div>
+        <div class="card" style="margin:0;padding:8px 12px">
+          <h4 style="font-size:14px">排查方法</h4>
+          <ul style="font-size:13px;line-height:1.5;margin-top:2px;padding-left:16px">
+            <li>查看系统事件日志</li>
+            <li>使用 DebugView 抓取日志</li>
+            <li>替换为 release 正式版驱动</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card" style="margin:0;padding:8px 12px;grid-column:1 / -1">
+        <h4 style="font-size:14px">DMP 提取</h4>
+        <p class="dim" style="font-size:12px;line-height:1.5;margin-top:2px">提取 dmp 文件，在 C:\Windows\MEMORY.DMP（建议压缩后再传输）。如果没有产生，先打开核心内存转存，等复现后再提取</p>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0;flex:1">
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide80_img169.png" style="max-height:220px;width:auto" alt="蓝屏1"><p class="cap">蓝屏日志</p></div>
+        <div class="img-item" style="padding:8px;height:100%"><img src="images/slide80_img170.png" style="max-height:220px;width:auto" alt="蓝屏2"><p class="cap">系统事件</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 37: Encryption Logic -->
+  <section class="slide" data-title="加密逻辑">
+    <p class="kicker">Crypto · 加密逻辑</p>
+    <h2 class="h2">加密工作原理</h2>
+    <div style="margin-top:12px;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:center">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card" style="margin:0;padding:14px 16px;flex:1;display:flex;flex-direction:column;justify-content:center">
+          <h4>加密流程</h4>
+          <ul style="font-size:12px;line-height:1.6;margin-top:6px;padding-left:16px">
+            <li>文件写入时实时加密，读取时透明解密</li>
+            <li>通过文件系统过滤驱动（mini-filter）拦截 I/O</li>
+            <li>根据进程策略判断是否需要加解密</li>
+            <li>密文标识头标记文件加密状态</li>
+          </ul>
+        </div>
+        <div class="card" style="margin:0;padding:14px 16px;flex:1;display:flex;flex-direction:column;justify-content:center">
+          <h4>解密流程</h4>
+          <ul style="font-size:12px;line-height:1.6;margin-top:6px;padding-left:16px">
+            <li>受信进程读取密文 → 驱动自动解密 → 明文返回</li>
+            <li>非受信进程读取密文 → 驱动返回密文数据</li>
+            <li>外发/解密申请 → 审批通过后去除密文标识</li>
+          </ul>
+        </div>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr;gap:0;margin:0">
+        <div class="img-item" style="padding:12px;height:100%"><img src="images/slide82_img174.png" style="max-height:360px;width:auto" alt="加密原理"><p class="cap">加解密原理示意</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 38: HOOK Injection -->
+  <section class="slide" data-title="HOOK注入">
+    <p class="kicker">Hook · 注入逻辑</p>
+    <h2 class="h2">HOOK 注入逻辑</h2>
+    <div style="margin-top:12px;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:center">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card" style="margin:0;padding:14px 16px;flex:1;display:flex;flex-direction:column;justify-content:center">
+          <h4>注入方式</h4>
+          <ul style="font-size:12px;line-height:1.6;margin-top:6px;padding-left:16px">
+            <li>通过驱动层 HOOK 系统 API，拦截文件 I/O 操作</li>
+            <li>支持进程级注入，只对受信进程生效</li>
+            <li>HOOK 点包括 CreateFile、ReadFile、WriteFile 等</li>
+          </ul>
+        </div>
+        <div class="card" style="margin:0;padding:14px 16px;flex:1;display:flex;flex-direction:column;justify-content:center">
+          <h4>注入逻辑</h4>
+          <ul style="font-size:12px;line-height:1.6;margin-top:6px;padding-left:16px">
+            <li>进程启动时检测策略 → 匹配则注入 HOOK DLL</li>
+            <li>HOOK 层区分读/写操作，按策略透明加解密</li>
+            <li>非受信进程绕过 HOOK 层，返回原始数据</li>
+          </ul>
+        </div>
+      </div>
+      <div class="img-grid" style="grid-template-columns:1fr;gap:0;margin:0">
+        <div class="img-item" style="padding:12px;height:100%"><img src="images/slide83_img175.png" style="max-height:360px;width:auto" alt="HOOK注入"><p class="cap">HOOK 注入示意</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 34: Common Tools -->
+  <section class="slide" data-title="常见工具">
+    <p class="kicker">Tools · 常见工具</p>
+    <h2 class="h2">常见调试工具</h2>
+    <div style="margin-top:12px;flex:1;display:flex;flex-direction:column;gap:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0">
+        <div class="card tc" style="margin:0;padding:6px 10px"><h4 style="font-size:18px;margin:0">Procmon</h4><p class="dim" style="font-size:11px;margin-top:1px">进程监控 · 文件/注册表/进程活动</p></div>
+        <div class="card tc" style="margin:0;padding:6px 10px"><h4 style="font-size:18px;margin:0">Procexp</h4><p class="dim" style="font-size:11px;margin-top:1px">进程管理 · 查看进程详细信息</p></div>
+        <div class="card tc" style="margin:0;padding:6px 10px"><h4 style="font-size:18px;margin:0">DbgView</h4><p class="dim" style="font-size:11px;margin-top:1px">调试日志 · 实时捕获调试输出</p></div>
+        <div class="card tc" style="margin:0;padding:6px 10px"><h4 style="font-size:18px;margin:0">WinDbg</h4><p class="dim" style="font-size:11px;margin-top:1px">内核调试 · Dump 分析与调试</p></div>
+      </div>
+      <div class="img-grid" style="grid-template-columns:repeat(4,1fr);gap:8px;flex:1;align-content:center">
+        <div class="img-item" style="padding:4px;min-height:100px"><img src="images/slide84_img176.png" style="max-height:100px;width:auto" alt="Procmon1"><p class="cap" style="font-size:9px">Procmon · 主界面</p></div>
+        <div class="img-item" style="padding:4px;min-height:100px"><img src="images/slide84_img177.png" style="max-height:100px;width:auto" alt="Procmon2"><p class="cap" style="font-size:9px">Procmon · 筛选器</p></div>
+        <div class="img-item" style="padding:4px;min-height:100px"><img src="images/slide84_img178.png" style="max-height:100px;width:auto" alt="Procexp1"><p class="cap" style="font-size:9px">Procexp · 进程树</p></div>
+        <div class="img-item" style="padding:4px;min-height:100px"><img src="images/slide84_img179.png" style="max-height:100px;width:auto" alt="Procexp2"><p class="cap" style="font-size:9px">Procexp · 属性</p></div>
+        <div class="img-item" style="padding:4px;min-height:100px"><img src="images/slide84_img180.png" style="max-height:100px;width:auto" alt="Procexp3"><p class="cap" style="font-size:9px">Procexp · 详细信息</p></div>
+        <div class="img-item" style="padding:4px;min-height:100px"><img src="images/slide85_img181.png" style="max-height:100px;width:auto" alt="DbgView1"><p class="cap" style="font-size:9px">DbgView · 输出</p></div>
+        <div class="img-item" style="padding:4px;min-height:100px"><img src="images/slide85_img182.png" style="max-height:100px;width:auto" alt="WinDbg1"><p class="cap" style="font-size:9px">WinDbg · 调试会话</p></div>
+        <div class="img-item" style="padding:4px;min-height:100px"><img src="images/slide85_img183.png" style="max-height:100px;width:auto" alt="WinDbg2"><p class="cap" style="font-size:9px">WinDbg · 调用栈</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 35: Cases -->
+  <section class="slide" data-title="问题案例">
+    <p class="kicker">Cases · 问题案例</p>
+    <h2 class="h2">常见问题案例</h2>
+    <div style="margin-top:10px;flex:1;display:flex;flex-direction:column;gap:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1">
+        <!-- Case 1 -->
+        <div class="card" style="margin:0;padding:14px 16px;display:flex;flex-direction:column;gap:8px;border-left:4px solid #f59e0b;height:100%">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-weight:700;font-size:14px;flex-shrink:0">1</span>
+            <h4 style="font-size:17px;margin:0;flex:1">客户端还是服务器？</h4>
+            <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(245,158,11,.15);color:#f59e0b;font-weight:600">解密失败</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4">
+            <span style="flex-shrink:0;color:#ef4444;font-weight:700;min-width:42px">症状</span>
+            <p style="margin:0">客户端申请解密，审批员通过后，发现文件并没有解密成功。</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4">
+            <span style="flex-shrink:0;color:#3b82f6;font-weight:700;min-width:42px">原理</span>
+            <p style="margin:0">服务器仅下发消息，最终由<span style="color:var(--brand);font-weight:600">客户端</span>执行解密动作。文件被占用或编辑过的文件无法被解密。</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4">
+            <span style="flex-shrink:0;color:#10b981;font-weight:700;min-width:42px">排查</span>
+            <p style="margin:0">记录提交人、时间等信息，拷贝<span style="color:var(--brand);font-weight:600">服务器日志</span>给研发分析；客户端解密失败时检查文件是否被修改。</p>
+          </div>
+        </div>
+        <!-- Case 2 -->
+        <div class="card" style="margin:0;padding:14px 16px;display:flex;flex-direction:column;gap:8px;border-left:4px solid #3b82f6;height:100%">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-weight:700;font-size:14px;flex-shrink:0">2</span>
+            <h4 style="font-size:17px;margin:0;flex:1">策略 · HOOK · 驱动 · 非问题？</h4>
+            <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(59,130,246,.15);color:#3b82f6;font-weight:600">卡死/闪退</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4">
+            <span style="flex-shrink:0;color:#ef4444;font-weight:700;min-width:42px">症状</span>
+            <p style="margin:0">caseviews 软件打开文件编辑后，保存卡死或闪退。</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4">
+            <span style="flex-shrink:0;color:#3b82f6;font-weight:700;min-width:42px">原理</span>
+            <p style="margin:0">程序阻止了文件流回写，导致进程无法响应。可能涉及 HOOK 动作、加密中间文件、驱动适配、第三方冲突。</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4">
+            <span style="flex-shrink:0;color:#10b981;font-weight:700;min-width:42px">排查</span>
+            <p style="margin:0">去 HOOK 进程 → procmon 抓文件类型 → 抓 debug+procmon 日志给研发 → 明文停驱动验证。</p>
+          </div>
+        </div>
+      </div>
+      <!-- 排查流程时间轴 -->
+      <div style="background:var(--bg2);border-radius:var(--radius-md);padding:10px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
+          <div style="display:flex;flex-direction:column;align-items:center;flex:1">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">1</div>
+            <p style="font-size:11px;margin:4px 0 0;font-weight:600">记录信息</p>
+            <p class="dim" style="font-size:10px;margin:0">人/时间/环境</p>
+          </div>
+          <div style="flex:1;height:2px;background:linear-gradient(90deg,#f59e0b,#3b82f6);margin-top:-18px;opacity:.5"></div>
+          <div style="display:flex;flex-direction:column;align-items:center;flex:1">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">2</div>
+            <p style="font-size:11px;margin:4px 0 0;font-weight:600">抓取日志</p>
+            <p class="dim" style="font-size:10px;margin:0">procmon+dbgview</p>
+          </div>
+          <div style="flex:1;height:2px;background:linear-gradient(90deg,#3b82f6,#8b5cf6);margin-top:-18px;opacity:.5"></div>
+          <div style="display:flex;flex-direction:column;align-items:center;flex:1">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">3</div>
+            <p style="font-size:11px;margin:4px 0 0;font-weight:600">分析定位</p>
+            <p class="dim" style="font-size:10px;margin:0">HOOK/驱动/策略</p>
+          </div>
+          <div style="flex:1;height:2px;background:linear-gradient(90deg,#8b5cf6,#10b981);margin-top:-18px;opacity:.5"></div>
+          <div style="display:flex;flex-direction:column;align-items:center;flex:1">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">✓</div>
+            <p style="font-size:11px;margin:4px 0 0;font-weight:600">提交研发</p>
+            <p class="dim" style="font-size:10px;margin:0">日志+现象</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 35: Contact Us -->
+  <section class="slide center tc" data-title="联系我们">
+    <div style="max-width:880px;margin:0 auto">
+      <p class="kicker">Contact · 联系我们</p>
+      <h1 class="h1" style="font-size:96px;margin:8px 0"><span class="gradient-text">Thanks</span></h1>
+      <p class="lede" style="margin-bottom:24px">感谢聆听 · 期待与您进一步交流</p>
+      <div class="card card-accent" style="padding:18px 24px;text-align:left">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+          <div>
+            <span class="pill" style="background:color-mix(in srgb,#3b82f6 14%,transparent);color:#3b82f6;border-color:color-mix(in srgb,#3b82f6 30%,transparent)">Service</span>
+            <p style="margin:8px 0 0;font-size:13px"><b>用户服务中心</b></p>
+            <p class="dim" style="font-size:11px;margin:2px 0 0;font-family:JetBrains Mono,monospace">http://103.85.173.242:20000/</p>
+          </div>
+          <div>
+            <span class="pill" style="background:color-mix(in srgb,#10b981 14%,transparent);color:#10b981;border-color:color-mix(in srgb,#10b981 30%,transparent)">Web</span>
+            <p style="margin:8px 0 0;font-size:13px"><b>官网</b></p>
+            <p class="dim" style="font-size:11px;margin:2px 0 0;font-family:JetBrains Mono,monospace">www.iandsec.com</p>
+          </div>
+          <div>
+            <span class="pill" style="background:color-mix(in srgb,#f59e0b 14%,transparent);color:#f59e0b;border-color:color-mix(in srgb,#f59e0b 30%,transparent)">Hotline</span>
+            <p style="margin:8px 0 0;font-size:13px"><b>咨询热线</b></p>
+            <p class="dim" style="font-size:11px;margin:2px 0 0;font-family:JetBrains Mono,monospace">400-1381-063</p>
+          </div>
+        </div>
+      </div>
+      <div class="grid g2 mt-l">
+        <div class="card card-accent" style="text-align:left">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="pill dim" style="font-size:10px">HQ · 总部</span>
+            <h4 style="margin:0;font-size:16px">北京</h4>
+          </div>
+          <p class="dim" style="font-size:12px;line-height:1.5">北京市海淀区中关村东升科技园<br>北领地B-2楼3层</p>
+        </div>
+        <div class="card card-accent" style="text-align:left">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="pill dim" style="font-size:10px">Branch · 分公司</span>
+            <h4 style="margin:0;font-size:16px">武汉</h4>
+          </div>
+          <p class="dim" style="font-size:12px;line-height:1.5">武汉市东湖新技术开发区徽商大厦<br>B栋5层505室</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+<script src="assets/runtime.js"></script>
+<script>
+/* Top progress bar */
+(function(){
+  var bar=document.createElement('div');bar.className='deck-progress';bar.style.width='0%';
+  document.body.appendChild(bar);
+  var slides=document.querySelectorAll('.slide');
+  function update(){
+    var active=document.querySelector('.slide.is-active')||slides[0];
+    var idx=Array.prototype.indexOf.call(slides,active);
+    var pct=((idx+1)/slides.length)*100;
+    bar.style.width=pct+'%';
+  }
+  new MutationObserver(update).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
+  setTimeout(update,50);
+})();
+</script>
+</body></html>

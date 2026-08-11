@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual Environment
+venv/
+.venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data
+data/uploads/*
+data/chroma_db/*
+!data/uploads/.gitkeep
+!data/chroma_db/.gitkeep
+!data/sqlite/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Environment
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Streamlit
+.streamlit/secrets.toml
