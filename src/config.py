@@ -105,10 +105,10 @@ def validate_config() -> bool:
         issues.append("❌ ANTHROPIC_AUTH_TOKEN 未配置")
 
     if issues:
-        print("配置检查发现问题：")
+        print("[ERROR] Config issues found:")
         for issue in issues:
             print(f"  {issue}")
         return False
 
-    print("✅ 配置检查通过")
+    print("[OK] Config validation passed")
     return True

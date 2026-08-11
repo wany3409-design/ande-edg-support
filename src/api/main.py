@@ -13,10 +13,10 @@ from src.config import API_HOST, API_PORT
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
     # 启动时
-    print("🚀 安得EDG智能技术支持助手 API 启动中...")
+    print("[INFO] Ande EDG Support API starting...")
     yield
     # 关闭时
-    print("👋 安得EDG智能技术支持助手 API 已关闭")
+    print("[INFO] Ande EDG Support API shut down")
 
 
 def create_app() -> FastAPI:
