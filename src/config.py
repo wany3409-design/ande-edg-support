@@ -1,44 +1,69 @@
 """
 安得EDG智能技术支持助手 - 配置管理
+
+配置优先级: 环境变量 > Streamlit Secrets > .env 文件 > 默认值
 """
 
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# 加载 .env 文件
+# 加载 .env 文件（本地开发使用）
 load_dotenv()
+
+# 尝试加载 Streamlit Secrets（云端部署使用）
+_st_secrets = None
+try:
+    import streamlit as st
+    _st_secrets = st.secrets
+except (ImportError, RuntimeError):
+    pass
+
+
+def _get_config(key: str, default: str = "") -> str:
+    """读取配置，优先级: 环境变量 > Streamlit Secrets > .env > 默认值"""
+    val = os.getenv(key)
+    if val:
+        return val
+    if _st_secrets:
+        try:
+            val = _st_secrets[key]
+            if val:
+                return val
+        except KeyError:
+            pass
+    return default
 
 # 项目根目录
 PROJECT_ROOT = Path(__file__).parent.parent
 
 # ========== DeepSeek API 配置 ==========
-DEEPSEEK_AUTH_TOKEN = os.getenv("ANTHROPIC_AUTH_TOKEN", "")
-DEEPSEEK_BASE_URL = os.getenv("ANTHROPIC_BASE_URL", "https://api.deepseek.com/anthropic")
-DEEPSEEK_MODEL = os.getenv("ANTHROPIC_MODEL", "deepseek-v4-pro")
+DEEPSEEK_AUTH_TOKEN = _get_config("ANTHROPIC_AUTH_TOKEN")
+DEEPSEEK_BASE_URL = _get_config("ANTHROPIC_BASE_URL", "https://api.deepseek.com/anthropic")
+DEEPSEEK_MODEL = _get_config("ANTHROPIC_MODEL", "deepseek-v4-pro")
 
 # ========== 嵌入模型配置 ==========
-EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "BAAI/bge-large-zh-v1.5")
-EMBEDDING_DEVICE = os.getenv("EMBEDDING_DEVICE", "cpu")
+EMBEDDING_MODEL_NAME = _get_config("EMBEDDING_MODEL_NAME", "BAAI/bge-large-zh-v1.5")
+EMBEDDING_DEVICE = _get_config("EMBEDDING_DEVICE", "cpu")
 
 # ========== ChromaDB 配置 ==========
-CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", str(PROJECT_ROOT / "data" / "chroma_db"))
+CHROMA_PERSIST_DIR = _get_config("CHROMA_PERSIST_DIR", str(PROJECT_ROOT / "data" / "chroma_db"))
 
 # ========== SQLite 配置 ==========
-SQLITE_DB_PATH = os.getenv("SQLITE_DB_PATH", str(PROJECT_ROOT / "data" / "sqlite" / "ande_edg.db"))
+SQLITE_DB_PATH = _get_config("SQLITE_DB_PATH", str(PROJECT_ROOT / "data" / "sqlite" / "ande_edg.db"))
 
 # ========== 文本切分配置 ==========
-CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "500"))
-CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "50"))
+CHUNK_SIZE = int(_get_config("CHUNK_SIZE", "500"))
+CHUNK_OVERLAP = int(_get_config("CHUNK_OVERLAP", "50"))
 
 # ========== 检索配置 ==========
-RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "5"))
-RETRIEVAL_TOP_K_CANDIDATE = int(os.getenv("RETRIEVAL_TOP_K_CANDIDATE", "10"))
+RETRIEVAL_TOP_K = int(_get_config("RETRIEVAL_TOP_K", "5"))
+RETRIEVAL_TOP_K_CANDIDATE = int(_get_config("RETRIEVAL_TOP_K_CANDIDATE", "10"))
 
 # ========== 服务配置 ==========
-API_HOST = os.getenv("API_HOST", "0.0.0.0")
-API_PORT = int(os.getenv("API_PORT", "8000"))
-UI_PORT = int(os.getenv("UI_PORT", "8501"))
+API_HOST = _get_config("API_HOST", "0.0.0.0")
+API_PORT = int(_get_config("API_PORT", "8000"))
+UI_PORT = int(_get_config("UI_PORT", "8501"))
 
 # ========== 知识文档目录 ==========
 KNOWLEDGE_DOCS_DIR = PROJECT_ROOT / "knowledge_docs"
