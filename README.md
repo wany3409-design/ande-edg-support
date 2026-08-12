@@ -16,8 +16,7 @@
 
 | 层级 | 技术 |
 |------|------|
-| 前端 | Streamlit |
-| 后端 | FastAPI (Python) |
+| 前端 | Streamlit（直接调用 RAG 管线） |
 | 向量库 | ChromaDB |
 | 嵌入模型 | BAAI/bge-large-zh-v1.5 |
 | LLM | DeepSeek v4 |
@@ -45,28 +44,19 @@ cp .env.example .env
 # 编辑 .env 填入 DeepSeek API Key
 ```
 
-### 3. 初始化知识库
+### 3. 启动
 
 ```bash
-# 将安得EDG产品文档放入 knowledge_docs/ 目录
-# 运行初始化脚本
-python scripts/init_kb.py
-```
-
-### 4. 启动服务
-
-```bash
-# 终端1: 启动 FastAPI 后端
-python -m src.api.main
-
-# 终端2: 启动 Streamlit 前端
+# 直接启动 Streamlit 前端（内置 RAG 管线，无需单独启动后端）
 streamlit run src/ui/app.py
+
+# 或者
+python -m streamlit run src/ui/app.py
 ```
 
-### 5. 访问
+### 4. 访问
 
-- 前端: http://localhost:8501
-- API 文档: http://localhost:8000/docs
+- 打开浏览器访问: **http://localhost:8501**
 
 ## 项目结构
 
@@ -96,13 +86,12 @@ ande-edg-support/
 ## 开发阶段
 
 - [x] Phase 1: 环境与基础项目
-- [ ] Phase 2: 文档解析
-- [ ] Phase 3: 知识库构建
-- [ ] Phase 4: RAG 问答管线
-- [ ] Phase 5: FastAPI 后端
-- [ ] Phase 6: Streamlit 前端
-- [ ] Phase 7: 测试与优化
-- [ ] Phase 8: 文档与部署
+- [x] Phase 2: 文档解析
+- [x] Phase 3: 知识库构建
+- [x] Phase 4: RAG 问答管线
+- [x] Phase 5: Streamlit 前端
+- [ ] Phase 6: 测试与优化
+- [ ] Phase 7: 文档与部署
 
 ## License
 

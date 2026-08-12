@@ -1,0 +1,738 @@
+[
+  {
+    "qid": "Q01",
+    "question": "安得EDG支持哪些文件类型的加密？",
+    "status": "OK",
+    "category": "knowledge",
+    "category_confidence": "high",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "根据您提供的参考资料，**当前知识库中没有找到足够依据确认安得EDG具体支持哪些文件类型的详细清单**。\n\n参考资料中没有列出支持加密的完整文件扩展名列表，但结合案例描述可以推断该系统能够覆盖多种常见的业务文件格式。\n\n**以下为推测/排查建议，非产品官方结论：**\n参考资料[4]和[5]的案例中提到了对多种应用和文件类型的支持，推测可能包含：\n*   **办公文档**：文档（如Word、Excel）、PDF等（参考证据3、5中的透明加密描述）。\n*   **工程图纸**：SolidWorks图纸等（参考证据4中对solidworks图纸的支持案例）。\n*   **开发文件**：源代码、编译文",
+    "top1_sim": 0.5887,
+    "top1_rerank": 0.6266,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.02,
+      "rerank": 0.001,
+      "llm": 11.829,
+      "total": 11.85,
+      "grounding": 0.001
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": true
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 6,
+      "claims_grounded": 5,
+      "unverified": [
+        "3.  直接联系安得官方的技术支持或销售人员，获取最新的兼容性列表白皮书。"
+      ]
+    }
+  },
+  {
+    "qid": "Q02",
+    "question": "文件为什么会自动加密？",
+    "status": "OK",
+    "category": "troubleshooting",
+    "category_confidence": "medium",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "【问题判断】\n文件自动加密通常是安得EDG系统的**正常功能行为**，而非故障。当终端下发了**透明加解密策略**（即自动强制加密策略）后，符合策略类型的文件在编辑保存时会被自动加密。\n\n【可能原因】\n- 该终端受透明加解密策略管控，且该文件类型（如 .docx、.xlsx 等）包含在策略范围内。\n- 文件在加密范围内被进程写入（如 Word 编辑保存），触发筛选驱动自动加密。\n- 策略可能针对特定用户/组织/终端生效，当前用户恰好在此范围内。\n\n【排查步骤】\n1. **确认策略下发状态**  \n   登录EDG管理后台，检查该终端所在用户或组织是否已下发并启用了“透明加解密”或“文件自动加密",
+    "top1_sim": 0.5428,
+    "top1_rerank": 0.2628,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.011,
+      "rerank": 0.001,
+      "llm": 11.06,
+      "total": 11.071,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 19,
+      "claims_grounded": 16,
+      "unverified": [
+        "- 策略可能针对特定用户/组织/终端生效，当前用户恰好在此范围内。",
+        "4. **排查是否为预期行为**",
+        "- **若符合安全要求且为预期行为**：无需处置，系统保障机密文件不落地。"
+      ]
+    }
+  },
+  {
+    "qid": "Q03",
+    "question": "如何对单个文件进行手动解密？",
+    "status": "OK",
+    "category": "knowledge",
+    "category_confidence": "low",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "根据现有资料，安得EDG对单个文件进行手动解密的功能称为“特权解密”。操作需要管理员预先在secadmin工作台开启相应权限。\n\n【前置条件】\n管理员在secadmin工作台中为用户开启“特权解密”权限（具体路径：secadmin内工作台-特权功能）。\n\n【操作步骤】\n1. 选中需要解密的文件。\n2. 单击鼠标右键，在弹出的菜单中选择“安得卫士”。\n3. 点击“特权解密”，系统会将密文解密为明文。\n\n【验证方法】\n解密成功后，文件内容变为明文，不再受加密保护。\n\n【参考资料】\n> 《安得卫士（AndSec）产品使用手册》第281页，4.6.特权解密",
+    "top1_sim": 0.4651,
+    "top1_rerank": 0.2395,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.01,
+      "rerank": 0.0,
+      "llm": 6.746,
+      "total": 6.757,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 6,
+      "claims_grounded": 6,
+      "unverified": []
+    }
+  },
+  {
+    "qid": "Q04",
+    "question": "文件解密后为什么又自动加密了？",
+    "status": "OK",
+    "category": "troubleshooting",
+    "category_confidence": "medium",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "**【问题判断】**\n文件在解密后又被自动加密，大概率是因为该文件仍处于“透明加解密策略”的生效范围内。当用户打开被解密的文件进行编辑保存时，策略再次触发，导致文件被重新加密。\n\n**【可能原因】**\n1. 当前客户端下发的策略中，该文件类型被设置为“**自动加密**”（透明加密）模式。\n2. 解密操作只实现了临时解密，并未将文件移出策略监控路径，也未改变策略对文件应用的“自动加密”规则。\n\n**【排查步骤】**\n1. 在客户端右键该文件，查看有无“安得卫士”的加密图标或加密状态提示。\n2. 登录管理后台，进入“策略配置”模块，检查该文件所属应用（如金山WPS、Office等）的加密功能类型：",
+    "top1_sim": 0.4357,
+    "top1_rerank": 0.3557,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.011,
+      "rerank": 0.001,
+      "llm": 13.068,
+      "total": 13.079,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": false,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 14,
+      "claims_grounded": 13,
+      "unverified": [
+        "- 客户端的操作系统和EDG版本。"
+      ]
+    }
+  },
+  {
+    "qid": "Q05",
+    "question": "例外目录应该如何配置？",
+    "status": "OK",
+    "category": "implementation",
+    "category_confidence": "medium",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "【前置条件】\n- 已登录安得EDG管理后台，具备策略配置权限。\n- 需明确要设置例外的目录路径（如 `D:\\Company\\Public\\*`）及对应的应用场景（如对某条文件读写管控策略做排除）。\n\n【操作步骤】\n1. 进入策略配置界面（根据证据2，路径可能为“系统管理 → 策略配置”或类似入口，支持按全局、部门、角色、用户定制）。\n2. 选择目标配置类型（例如“文件备份”或“文件操作管控”），点击【添加一项配置】。\n3. 在新增的策略记录中，找到“例外路径”字段（与“匹配路径”“进程列表”并列），填写需要排除的目录路径（如 `C:\\Example\\*` 或相对路径等，具体格式请参照产品界面的",
+    "top1_sim": 0.3256,
+    "top1_rerank": 0.2602,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.01,
+      "rerank": 0.001,
+      "llm": 13.366,
+      "total": 13.377,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 9,
+      "claims_grounded": 8,
+      "unverified": [
+        "4. 若需要将整个目录及子目录均排除，建议使用通配符（如 `*`）覆盖所有子文件。"
+      ]
+    }
+  },
+  {
+    "qid": "Q06",
+    "question": "文件类型策略在哪里配置？",
+    "status": "OK",
+    "category": "knowledge",
+    "category_confidence": "low",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "【知识问答】\n\n在安得EDG中，文件类型策略的配置位置为：**策略管理 → 策略配置**（具体路径在《安得卫士（AndSec）产品使用手册》第1.2.2.1.1节）。\n\n在该界面添加或编辑一条策略时，有一条完整的策略构成，其中就包含 **“文件类型”** 字段。您需要在该字段中 **“添加需要加密的文件类型”**（例如：`*.doc|*.docx|*.xls|*.xlsx`），并可根据需要设置例外目录、进程列表及优先级，从而完成文件类型的策略配置。\n\n> 1. 《安得卫士（AndSec）产品使用手册》第73页，1.2.2.1.1 策略配置  \n> 2. 《安得卫士（AndSec）产品使用手册》",
+    "top1_sim": 0.5176,
+    "top1_rerank": 0.2553,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.011,
+      "rerank": 0.0,
+      "llm": 4.943,
+      "total": 4.954,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 2,
+      "claims_grounded": 2,
+      "unverified": []
+    }
+  },
+  {
+    "qid": "Q07",
+    "question": "策略配置了为什么没有生效？",
+    "status": "OK",
+    "category": "troubleshooting",
+    "category_confidence": "medium",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "【问题判断】  \n当前无法根据知识库中的具体内容直接判断策略未生效的确切原因，因为相关资料仅包含手册的章节标题和简要操作示意，未涉及策略生效机制、生效条件或常见故障排查细节。\n\n【可能原因】  \n- 策略未正确分配给目标对象（如终端、用户或组）。  \n- 策略配置的检测对象、响应规则等关键参数未匹配实际场景。  \n- 客户端与服务器通信异常，策略未能正常下发或同步。  \n- 策略生效存在延迟或需要手动执行刷新/应用操作。  \n- 基线或策略优先级配置不当，导致其他策略覆盖。\n\n【排查步骤】  \n1. **确认策略已添加并启用**  \n   - 在“策略配置”界面检查该策略是否存在，状态是否为启",
+    "top1_sim": 0.4458,
+    "top1_rerank": 0.4837,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.011,
+      "rerank": 0.001,
+      "llm": 10.619,
+      "total": 10.63,
+      "grounding": 0.001
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": false,
+      "claims_checked": 27,
+      "claims_grounded": 8,
+      "unverified": [
+        "当前无法根据知识库中的具体内容直接判断策略未生效的确切原因，因为相关资料仅包含手册的章节标题和简要操作示意，未涉及策略生效机制、生效条件或常见故障排查细节。",
+        "- 策略未正确分配给目标对象（如终端、用户或组）。",
+        "- 客户端与服务器通信异常，策略未能正常下发或同步。",
+        "- 策略生效存在延迟或需要手动执行刷新/应用操作。",
+        "- 基线或策略优先级配置不当，导致其他策略覆盖。"
+      ]
+    }
+  },
+  {
+    "qid": "Q08",
+    "question": "AD域同步怎么配置？",
+    "status": "OK",
+    "category": "implementation",
+    "category_confidence": "medium",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "**【前置条件】**\n开始配置前，请确保已获取以下信息：\n1. AD域服务器的地址及端口号（例如：389 或 636）。\n2. AD域的根域DN信息（包含OU、DC等完整路径）。\n3. 拥有AD域查询/管理权限的域管理员账号及密码。\n4. 已在安得EDG系统中拥有进行“用户同步配置”的权限。\n\n**【操作步骤】**\n1. 登录安得EDG管理后台，导航至用户同步配置功能或第三方同步设置（通常在用户管理相关模块）。\n2. 新建或配置一条同步任务，设置关键参数：\n   - **域类型**：选择 `AD域`（根据当前知识库，系统目前支持的类型包括AD域、OpenLDAP、IBM TDS等）。\n   -",
+    "top1_sim": 0.1983,
+    "top1_rerank": 0.5928,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.01,
+      "rerank": 0.001,
+      "llm": 16.113,
+      "total": 16.124,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 16,
+      "claims_grounded": 15,
+      "unverified": [
+        "5. 保存配置并执行同步。"
+      ]
+    }
+  },
+  {
+    "qid": "Q09",
+    "question": "客户端安装后没有人员怎么办？",
+    "status": "OK-LLM",
+    "category": "troubleshooting",
+    "category_confidence": "medium",
+    "answerable_expected": false,
+    "is_answerable": true,
+    "answer_preview": "【问题判断】\n当前知识库中没有找到足够依据确认该问题。\n\n【可能原因】\n（以下为推测/排查建议，非产品官方结论）\n由于“客户端安装后没有人员”这一描述比较模糊，可能的原因包括但不限于：\n- 客户端尚未成功登录或连接到服务器，无法同步组织人员信息。\n- 服务器端未创建或同步人员/账号。\n- 客户端账号权限不足，被限制查看人员信息。\n- 客户端与服务器版本不匹配或通信端口不通。\n- 软件安装不完整，选择模块缺失导致功能异常。\n\n【排查步骤】\n（以下为推测/排查建议，非产品官方结论）\n1. 确认客户端登录状态：检查右下角托盘图标，确认客户端是否已登录，是否显示已连接服务器。\n2. 确认服务器地址与端",
+    "top1_sim": 0.3345,
+    "top1_rerank": 0.3878,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.01,
+      "rerank": 0.001,
+      "llm": 18.366,
+      "total": 18.377,
+      "grounding": 0.001
+    },
+    "checks": {
+      "has_citations": false,
+      "cites_correct_source": false,
+      "refuses_correctly": true,
+      "no_hallucination_flag": true,
+      "llm_refused": true
+    },
+    "grounding": {
+      "grounded": false,
+      "claims_checked": 20,
+      "claims_grounded": 13,
+      "unverified": [
+        "由于“客户端安装后没有人员”这一描述比较模糊，可能的原因包括但不限于：",
+        "- 客户端尚未成功登录或连接到服务器，无法同步组织人员信息。",
+        "- 客户端账号权限不足，被限制查看人员信息。",
+        "3. 检查服务器端人员信息：登录管理后台，确认组织架构中是否已创建用户，且账号状态正常。",
+        "- 若服务器端无该人员账号，需要管理员在后台创建对应账号。"
+      ]
+    }
+  },
+  {
+    "qid": "Q10",
+    "question": "客户端连接不上服务端怎么排查？",
+    "status": "OK",
+    "category": "troubleshooting",
+    "category_confidence": "high",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "【问题判断】\n客户端无法连接安得EDG服务端。\n\n【可能原因】\n当前知识库未提供“客户端连接不上服务端”的专项故障排查手册，无法直接确认具体原因。根据资料中涉及的零星信息，推测可能原因包括：\n- 客户端未正确配置服务器地址。\n- 客户端与服务器间的网络不可达或防火墙阻拦。\n- 服务端程序未运行或端口被其他程序占用。\n- 客户端处于离线状态且离线时长已用完，策略限制连接。\n- 必要的服务或进程未启动。\n\n【排查步骤】\n以下为推测/排查建议，非产品官方结论：\n1. **检查客户端服务器地址配置**：在客户端登录界面（或托盘菜单）确认“设置服务器地址”是否正确，是否填写了服务端IP或域名以及对应端口",
+    "top1_sim": 0.235,
+    "top1_rerank": 0.3372,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.011,
+      "rerank": 0.001,
+      "llm": 11.427,
+      "total": 11.438,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": false,
+      "claims_checked": 19,
+      "claims_grounded": 13,
+      "unverified": [
+        "- 服务端程序未运行或端口被其他程序占用。",
+        "- 必要的服务或进程未启动。",
+        "3. **检查服务端运行状态**：登录服务端系统，查看相关服务（如 logadmin）是否正常运行，端口是否被监听（netstat -ano）。",
+        "- 若网络不通：开放防火墙端口、调整网络策略。",
+        "- 若地址配置错误：更正配置后重试登录。"
+      ]
+    }
+  },
+  {
+    "qid": "Q11",
+    "question": "安得EDG服务端有哪些端口？",
+    "status": "OK",
+    "category": "knowledge",
+    "category_confidence": "medium",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "当前知识库中没有找到足够依据确认该问题。\n\n建议排查方向（以下为推测/排查建议，非产品官方结论）：\n- 查阅安得EDG产品的《安装部署手册》或《运维手册》，通常在其中会列出服务端需要开放的端口列表。\n- 常见EDG服务端可能涉及的端口类型包括：管理控制台Web端口（如80、443）、客户端与管理服务器通信端口（如TCP某个端口）、数据库端口（如3306、5432）、中间件端口等，具体以官方文档为准。\n- 可联系安得官方技术支持（咨询热线：400-138-1063）获取准确的端口信息。",
+    "top1_sim": 0.2591,
+    "top1_rerank": 0.5277,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.009,
+      "rerank": 0.001,
+      "llm": 4.494,
+      "total": 4.504,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": false,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": true
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 3,
+      "claims_grounded": 3,
+      "unverified": []
+    }
+  },
+  {
+    "qid": "Q12",
+    "question": "文件外发后对方为什么打不开？",
+    "status": "OK",
+    "category": "troubleshooting",
+    "category_confidence": "high",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "【问题判断】  \n对方无法打开外发文件，属于外发云盒（安得云盒）权限验证或使用环境类故障。根据资料，外发文件不是普通明文文档，而是受保护的文件（如云盒格式），需要经过身份认证并在权限范围内方可打开。\n\n【可能原因】  \n1. **身份认证未通过**：收件人未正确输入口令，或当前设备与绑定的机器码/PC不匹配。  \n2. **权限已过期或耗尽**：阅读时间、次数已用完，或文件已超过有效期被自动删除。  \n3. **在线权限无法获取**：外发云盒需从服务器获取最新权限，但接收环境无网络或无法连接服务器。  \n4. **权限已被回收**：管理员在线回收了该外发文件的权限。  \n5. **系统环境不支",
+    "top1_sim": 0.4202,
+    "top1_rerank": 0.2761,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.015,
+      "rerank": 0.001,
+      "llm": 22.795,
+      "total": 22.811,
+      "grounding": 0.001
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 24,
+      "claims_grounded": 21,
+      "unverified": [
+        "- **安全软件拦截**：将云盒文件添加至信任列表或临时关闭安全软件。",
+        "- 接收端操作系统版本（如Win11、Win10等），是否有安全软件拦截？",
+        "- 接收端能否正常访问外网？打开时具体提示什么错误？"
+      ]
+    }
+  },
+  {
+    "qid": "Q13",
+    "question": "压缩包解压后的文件为什么又被加密了？",
+    "status": "MISS",
+    "category": "troubleshooting",
+    "category_confidence": "medium",
+    "answerable_expected": true,
+    "is_answerable": false,
+    "answer_preview": "当前知识库中没有找到足够依据确认该问题。\n\n建议排查方向（以下为推测/排查建议，非产品官方结论）：\n1. 请确认该问题是否属于安得EDG产品的功能范围\n2. 建议查阅产品最新版官方文档或联系安得技术支持\n3. 提供更多上下文信息有助于进一步排查",
+    "top1_sim": 0.4559,
+    "top1_rerank": 0.2368,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.012,
+      "rerank": 0.001,
+      "llm": 0.0,
+      "total": 0.012,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": false,
+      "cites_correct_source": false,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": true
+    },
+    "grounding": {}
+  },
+  {
+    "qid": "Q14",
+    "question": "Word打开提示'你的组织策略阻止了我们为你完成此操作'怎么排查？",
+    "status": "MISS",
+    "category": "troubleshooting",
+    "category_confidence": "high",
+    "answerable_expected": true,
+    "is_answerable": false,
+    "answer_preview": "当前知识库中没有找到足够依据确认该问题。\n\n建议排查方向（以下为推测/排查建议，非产品官方结论）：\n1. 请确认该问题是否属于安得EDG产品的功能范围\n2. 建议查阅产品最新版官方文档或联系安得技术支持\n3. 提供更多上下文信息有助于进一步排查",
+    "top1_sim": 0.1807,
+    "top1_rerank": 0.1542,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.012,
+      "rerank": 0.001,
+      "llm": 0.0,
+      "total": 0.012,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": false,
+      "cites_correct_source": false,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": true
+    },
+    "grounding": {}
+  },
+  {
+    "qid": "Q15",
+    "question": "PDF文件打不开怎么办？",
+    "status": "OK",
+    "category": "troubleshooting",
+    "category_confidence": "high",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "【问题判断】\n当前知识库中没有找到针对“PDF文件打不开”这一问题的直接故障排除信息。\n\n【可能原因】\n无足够依据，无法确定。\n\n【排查步骤】\n以下为推测/排查建议，非产品官方结论：\n1. 确认该PDF文件是否被安得EDG加密或限制权限（例如只读、阅读次数已耗尽等），如是，请检查策略配置。\n2. 确认是否在沙盒环境中尝试打开，尝试通过沙盒内的“右键在软件中打开”的方式操作。\n3. 使用Procmon等工具抓取PDF阅读器进程的文件访问日志，检查是否有被EDG驱动/HOOK阻止或文件占用。\n4. 检查文件是否被其他程序占用或处于编辑锁定状态。\n\n【解决方案】\n- 若属于权限限制，请调整该文档的授",
+    "top1_sim": 0.2741,
+    "top1_rerank": 0.5322,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.012,
+      "rerank": 0.001,
+      "llm": 8.21,
+      "total": 8.223,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": true
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 12,
+      "claims_grounded": 9,
+      "unverified": [
+        "- 若属于权限限制，请调整该文档的授权策略或走审批流程。",
+        "- 打开时报错信息是什么（如权限不足、文件损坏、无响应）？",
+        "- 是在沙盒内操作还是普通桌面环境？"
+      ]
+    }
+  },
+  {
+    "qid": "Q16",
+    "question": "安得EDG怎么做POC测试？",
+    "status": "OK",
+    "category": "implementation",
+    "category_confidence": "medium",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "根据当前知识库，无法提供完整的安得EDG POC测试步骤。\n\n**依据如下：**\n知识库中包含一份《安得电子文档安全管理系统（EDG）POC测试方案》文件，但仅提供了文件名、第1页（封面）及第18页关于“2.8 硬盘加密”的片段。该片段只描述了“支持上传软件安装包”和“支持新建任务”两个测试项，未包含完整的测试前置条件、操作流程或验证标准。\n\n因此，无法按照要求的格式输出完整的POC测试方案。\n\n**建议排查方向（非产品官方结论）：**\n建议直接联系安得和众官方获取完整的《安得电子文档安全管理系统（EDG）POC测试方案》，或咨询技术支持获取针对性指导。\n\n**从现有资料中，可确认该文档包含的",
+    "top1_sim": 0.2046,
+    "top1_rerank": 0.6364,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.01,
+      "rerank": 0.0,
+      "llm": 7.587,
+      "total": 7.598,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": false,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 7,
+      "claims_grounded": 6,
+      "unverified": [
+        "- （具体步骤和验证方法缺失）"
+      ]
+    }
+  },
+  {
+    "qid": "Q17",
+    "question": "安得EDG的水印功能支持哪些类型？",
+    "status": "OK",
+    "category": "knowledge",
+    "category_confidence": "high",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "安得EDG的水印功能主要支持以下两种类型：\n\n- **屏幕水印**  \n  在显示器屏幕层面叠加水印，始终显示，对屏幕上的所有内容进行保护，起到防拍照和警示震慑作用。水印可附着于窗口呈现，内容可包含计算机名、IP/MAC、当前日期、用户信息及自定义内容，且支持调节宫格数、字体、颜色、深浅度、显示方向（斜式/水平）等。\n\n- **文档水印**  \n  支持在 Word、Excel、PowerPoint 等 Office 办公文档（含 WPS 32/64 位版本）中插入水印。可在文档打开阅读、打印等过程中加载，水印显示在文档中央，内容可自定义，可选择斜式或水平显示，并支持深浅度等样式调节。\n\n【参",
+    "top1_sim": 0.1925,
+    "top1_rerank": 0.5702,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.011,
+      "rerank": 0.001,
+      "llm": 6.023,
+      "total": 6.035,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 6,
+      "claims_grounded": 5,
+      "unverified": [
+        "安得EDG的水印功能主要支持以下两种类型："
+      ]
+    }
+  },
+  {
+    "qid": "Q18",
+    "question": "客户端日志在哪里查看？如何收集日志排查问题？",
+    "status": "OK",
+    "category": "troubleshooting",
+    "category_confidence": "medium",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "【问题判断】\n用户询问客户端日志的查看位置以及收集日志进行问题排查的方法。\n\n【可能原因】\n需要查询终端操作记录或导出日志用于故障诊断。\n\n【排查步骤】\n1.  **登录日志管理平台**：使用专用的日志管理员账号登录安得卫士（AndSec）的Web管理平台。\n2.  **访问日志模块**：登录成功后，在界面中找到“终端日志”、“文件日志”或“打印日志”等模块（根据你希望排查的问题类型选择，终端日志为综合记录）。\n3.  **设定查询条件**：在日志查询界面，输入或选择相关的查询条件以过滤和定位问题日志。支持的查询条件包括但不限于：\n    *   操作者姓名、手机号码、邮箱\n    *   操",
+    "top1_sim": 0.4347,
+    "top1_rerank": 0.3971,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.013,
+      "rerank": 0.001,
+      "llm": 21.496,
+      "total": 21.509,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 14,
+      "claims_grounded": 13,
+      "unverified": [
+        "要收集日志用于问题排查，可以通过以下两种方式："
+      ]
+    }
+  },
+  {
+    "qid": "Q19",
+    "question": "服务端如何部署？支持哪些操作系统？",
+    "status": "OK",
+    "category": "implementation",
+    "category_confidence": "medium",
+    "answerable_expected": true,
+    "is_answerable": true,
+    "answer_preview": "根据所提供的参考资料，关于服务端部署的具体操作步骤和支持的操作系统列表，信息不足，无法给出确切的实施指南。参考资料的概括性描述如下：\n\n- 部署方式：支持本地服务器、云服务器（阿里云、腾讯云、华为云等）或虚拟化环境（VMware、Hyper-V等）部署。\n- 操作系统：参考资料中仅有“支持系统 4”的描述，未列出具体操作系统版本名称。\n\n因此，无法按【前置条件】->【操作步骤】->【验证方法】的完整结构提供答案。\n\n**建议排查方向（以下为推测/排查建议，非产品官方结论）：**\n1. 查阅更详细的部署文档，如《安得卫士（AndSec）产品使用手册》第一章“服务端操作说明（sysadmin）”，",
+    "top1_sim": 0.3334,
+    "top1_rerank": 0.45,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.011,
+      "rerank": 0.0,
+      "llm": 10.981,
+      "total": 10.992,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": true,
+      "cites_correct_source": true,
+      "refuses_correctly": false,
+      "no_hallucination_flag": true,
+      "llm_refused": false
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 3,
+      "claims_grounded": 3,
+      "unverified": []
+    }
+  },
+  {
+    "qid": "Q20",
+    "question": "安得EDG是否支持与钉钉集成实现审批？",
+    "status": "OK-LLM",
+    "category": "knowledge",
+    "category_confidence": "high",
+    "answerable_expected": false,
+    "is_answerable": true,
+    "answer_preview": "当前知识库中没有找到足够依据确认安得EDG是否支持与钉钉集成实现审批。\n\n**建议排查方向（以下为推测/排查建议，非产品官方结论）：**\n- 查阅产品最新的版本发布说明或更新日志，看是否有新增钉钉集成功能。\n- 检查EDG管理平台中“系统设置”或“流程管理”等模块，看是否存在第三方审批集成（如钉钉、企业微信等）的相关配置项。\n- 联系安得官方技术支持或对接的售前/售后人员，直接确认版本能力与可能的定制方案。\n\n**参考资料**\n> 本次提供的知识库资料（《安得卫士（AndSec）产品使用手册》《安得电子文档安全管理系统（EDG）产品介绍》）中仅涉及邮件审批、流程审批等功能，未包含钉钉集成相关内",
+    "top1_sim": 0.1557,
+    "top1_rerank": 0.4967,
+    "retrieval_count": 10,
+    "rerank_count": 5,
+    "timing": {
+      "classification": 0.0,
+      "retrieval": 0.011,
+      "rerank": 0.001,
+      "llm": 4.122,
+      "total": 4.134,
+      "grounding": 0.0
+    },
+    "checks": {
+      "has_citations": false,
+      "cites_correct_source": false,
+      "refuses_correctly": true,
+      "no_hallucination_flag": true,
+      "llm_refused": true
+    },
+    "grounding": {
+      "grounded": true,
+      "claims_checked": 3,
+      "claims_grounded": 2,
+      "unverified": [
+        "- 联系安得官方技术支持或对接的售前/售后人员，直接确认版本能力与可能的定制方案。"
+      ]
+    }
+  }
+]
