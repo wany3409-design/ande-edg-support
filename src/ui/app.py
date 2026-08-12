@@ -449,11 +449,15 @@ _init_session()
 def _load_pipeline():
     from src.llm.answer_pipeline import AnswerPipeline
     _LOGGER.info("Initializing AnswerPipeline...")
-    p = AnswerPipeline()
-    _ = p.embedding_model
-    _ = p.collection
-    _LOGGER.info(f"Pipeline ready, collection={p.collection.count()}")
-    return p
+    try:
+        p = AnswerPipeline()
+        _ = p.embedding_model
+        _ = p.collection
+        _LOGGER.info(f"Pipeline ready, collection={p.collection.count()}")
+        return p
+    except Exception as e:
+        _LOGGER.error(f"Pipeline init failed: {e}", exc_info=True)
+        raise
 
 
 # ===== 日志工具 =====
@@ -822,7 +826,8 @@ def _friendly_error(e: Exception) -> str:
     for key, msg in _ERROR_MAP.items():
         if key.lower() in err_str.lower():
             return msg
-    return "系统异常，请联系管理员。"
+    # 临时显示真实错误用于排查 Cloud 部署问题
+    return f"系统异常: {err_str[:200]}"
 
 
 def _clear_conversation():
