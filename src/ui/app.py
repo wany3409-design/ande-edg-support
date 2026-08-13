@@ -1,11 +1,12 @@
 """
-安得EDG智能技术支持助手 — Streamlit UI v2
+技术支持助手 — Streamlit UI
 
 直接调用 AnswerPipeline，不经过 FastAPI。
 启动: streamlit run src/ui/app.py
 """
 
 import sys
+import io
 import time
 import json
 import logging
@@ -21,7 +22,7 @@ import streamlit as st
 # ===== 日志 =====
 _LOG_DIR = _PROJECT_ROOT / "data"
 _LOG_DIR.mkdir(parents=True, exist_ok=True)
-_LOGGER = logging.getLogger("ande_edg_ui")
+_LOGGER = logging.getLogger("tech_support_ui")
 _LOGGER.setLevel(logging.INFO)
 _h = logging.FileHandler(_LOG_DIR / "app.log", encoding="utf-8")
 _h.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
@@ -36,7 +37,7 @@ def _now():
 
 # ===== 页面配置 =====
 st.set_page_config(
-    page_title="安得EDG技术支持助手",
+    page_title="技术支持助手",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -48,47 +49,29 @@ st.markdown("""
     /* ========== 导入字体 ========== */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
-    /* ========== 全局变量 ========== */
     :root {
         --primary: #2563eb;
         --primary-light: #dbeafe;
         --primary-dark: #1e40af;
-        --success: #059669;
-        --success-light: #d1fae5;
-        --warning: #d97706;
-        --warning-light: #fef3c7;
-        --danger: #dc2626;
-        --danger-light: #fee2e2;
         --gray-50: #f9fafb;
         --gray-100: #f3f4f6;
         --gray-200: #e5e7eb;
         --gray-300: #d1d5db;
-        --gray-400: #9ca3af;
         --gray-500: #6b7280;
         --gray-600: #4b5563;
         --gray-700: #374151;
         --gray-800: #1f2937;
         --gray-900: #111827;
-        --radius-sm: 6px;
-        --radius: 10px;
-        --radius-lg: 14px;
-        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-        --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
-        --shadow-md: 0 4px 6px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
-        --shadow-lg: 0 10px 15px rgba(0,0,0,0.06), 0 4px 6px rgba(0,0,0,0.04);
     }
 
-    /* ========== 全局字体 ========== */
     html, body, [class*="css"] {
         font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    /* ========== 隐藏默认元素 ========== */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
     header[data-testid="stHeader"] { background: transparent !important; }
 
-    /* ========== 主容器 ========== */
     .main .block-container {
         padding-top: 1.5rem;
         max-width: 900px;
@@ -98,12 +81,14 @@ st.markdown("""
     .app-header {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 14px;
         padding: 16px 20px;
         background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
-        border-radius: var(--radius-lg);
+        border-radius: 14px;
         margin-bottom: 6px;
-        box-shadow: var(--shadow-md);
+        box-shadow: 0 4px 12px rgba(37,99,235,0.18);
+        text-align: center;
     }
     .app-header-icon {
         width: 44px; height: 44px;
@@ -119,23 +104,14 @@ st.markdown("""
         font-weight: 700;
         margin: 0;
         letter-spacing: -0.01em;
+        text-align: center;
     }
     .app-header-text p {
         color: rgba(255,255,255,0.78);
         font-size: 0.82rem;
         margin: 2px 0 0 0;
         font-weight: 400;
-    }
-
-    /* ========== 侧边栏 ========== */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-        border-right: 1px solid var(--gray-200);
-    }
-    [data-testid="stSidebar"] .stButton > button {
-        border-radius: var(--radius);
-        font-weight: 500;
-        transition: all 0.15s;
+        text-align: center;
     }
 
     /* ========== 用户消息气泡 ========== */
@@ -161,13 +137,21 @@ st.markdown("""
         margin-bottom: 4px;
         letter-spacing: 0.02em;
     }
+    .user-attach {
+        display: inline-flex; align-items: center; gap: 4px;
+        margin-top: 8px;
+        padding: 3px 10px;
+        background: rgba(255,255,255,0.18);
+        border-radius: 12px;
+        font-size: 0.76rem;
+    }
 
     /* ========== AI 回答卡片 ========== */
     .ai-card {
         background: #fff;
         border: 1px solid var(--gray-200);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow);
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
         margin: 12px 0 18px 0;
         overflow: hidden;
     }
@@ -187,7 +171,6 @@ st.markdown("""
         border-radius: 20px;
         font-size: 0.78rem;
         font-weight: 600;
-        letter-spacing: 0.01em;
     }
     .badge-knowledge { background: #dbeafe; color: #1e40af; }
     .badge-implementation { background: #d1fae5; color: #065f46; }
@@ -208,42 +191,37 @@ st.markdown("""
         border-bottom: 2px solid var(--gray-100);
     }
     .ai-card-body h3:first-child { margin-top: 0; }
-    .ai-card-body strong {
-        color: var(--gray-900);
-    }
-    .ai-card-body ul, .ai-card-body ol {
-        padding-left: 20px;
-        margin: 6px 0;
-    }
+    .ai-card-body strong { color: var(--gray-900); }
+    .ai-card-body ul, .ai-card-body ol { padding-left: 20px; margin: 6px 0; }
     .ai-card-body li { margin: 4px 0; }
     .ai-card-body blockquote {
         border-left: 3px solid var(--primary);
         background: var(--primary-light);
         padding: 10px 14px;
-        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        border-radius: 0 6px 6px 0;
         margin: 10px 0;
         color: var(--gray-700);
     }
 
+    /* ========== 证据分级标记高亮 ========== */
+    .tag-supported { background: #d1fae5; color: #065f46; padding: 1px 7px; border-radius: 5px; font-size: 0.82em; font-weight: 600; white-space: nowrap; }
+    .tag-integrated { background: #e0e7ff; color: #3730a3; padding: 1px 7px; border-radius: 5px; font-size: 0.82em; font-weight: 600; white-space: nowrap; }
+    .tag-inferred { background: #fef3c7; color: #92400e; padding: 1px 7px; border-radius: 5px; font-size: 0.82em; font-weight: 600; white-space: nowrap; }
+    .tag-missing { background: #fee2e2; color: #991b1b; padding: 1px 7px; border-radius: 5px; font-size: 0.82em; font-weight: 600; white-space: nowrap; }
+    .tag-generic { background: #f3e8ff; color: #6b21a8; padding: 1px 7px; border-radius: 5px; font-size: 0.82em; font-weight: 600; white-space: nowrap; }
+
     /* ========== 拒绝回答卡片 ========== */
-    .ai-card-refusal {
-        border-color: #fecaca;
-    }
-    .ai-card-refusal .ai-card-header {
-        background: #fef2f2;
-        border-bottom-color: #fee2e2;
-    }
-    .ai-card-refusal .ai-card-body {
-        color: var(--gray-600);
-    }
+    .ai-card-refusal { border-color: #fecaca; }
+    .ai-card-refusal .ai-card-header { background: #fef2f2; border-bottom-color: #fee2e2; }
+    .ai-card-refusal .ai-card-body { color: var(--gray-600); }
 
     /* ========== 参考资料 ========== */
     .ref-section {
         margin: 14px 0;
         border: 1px solid var(--gray-200);
-        border-radius: var(--radius);
+        border-radius: 10px;
         overflow: hidden;
-        box-shadow: var(--shadow-sm);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     .ref-item {
         display: flex;
@@ -269,17 +247,14 @@ st.markdown("""
     .ref-info { flex: 1; min-width: 0; }
     .ref-info .ref-src { font-weight: 600; font-size: 0.88rem; color: var(--gray-800); }
     .ref-info .ref-meta { font-size: 0.78rem; color: var(--gray-500); margin-top: 2px; }
-    .ref-info .ref-meta span {
-        display: inline-block;
-        margin-right: 12px;
-    }
+    .ref-info .ref-meta span { display: inline-block; margin-right: 12px; }
     .ref-evidence-text {
         background: #f8fafc;
         color: var(--gray-700);
         font-size: 0.82rem;
         line-height: 1.6;
         padding: 10px 14px;
-        border-radius: var(--radius-sm);
+        border-radius: 6px;
         margin-top: 8px;
         white-space: pre-wrap;
         word-break: break-word;
@@ -294,12 +269,6 @@ st.markdown("""
     }
     .retrieval-item:hover { background: var(--gray-50); }
     .retrieval-item:last-child { border-bottom: none; }
-    .score-bar {
-        display: inline-flex;
-        gap: 8px;
-        font-size: 0.78rem;
-        font-family: 'SF Mono', 'Consolas', monospace;
-    }
     .score-tag {
         display: inline-block;
         padding: 3px 8px;
@@ -312,16 +281,9 @@ st.markdown("""
     .score-low { background: #fee2e2; color: #991b1b; }
 
     /* ========== Timeline 指标 ========== */
-    .metrics-row {
-        display: flex;
-        gap: 10px;
-        margin: 10px 0;
-        flex-wrap: wrap;
-    }
+    .metrics-row { display: flex; gap: 10px; margin: 10px 0; flex-wrap: wrap; }
     .metric-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
+        display: inline-flex; align-items: center; gap: 5px;
         padding: 6px 12px;
         background: var(--gray-50);
         border-radius: 20px;
@@ -332,11 +294,6 @@ st.markdown("""
     .metric-chip .val { font-weight: 600; color: var(--gray-800); }
 
     /* ========== 按钮 ========== */
-    .btn-row {
-        display: flex;
-        gap: 8px;
-        margin-top: 8px;
-    }
     div[data-testid="stButton"] > button {
         border-radius: 20px !important;
         font-size: 0.82rem !important;
@@ -346,19 +303,7 @@ st.markdown("""
     }
     div[data-testid="stButton"] > button:hover {
         transform: translateY(-1px);
-        box-shadow: var(--shadow-md);
-    }
-
-    /* ========== Spinner ========== */
-    .loading-container {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 20px 24px;
-        background: var(--gray-50);
-        border-radius: var(--radius);
-        border: 1px dashed var(--gray-300);
-        margin: 12px 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.06);
     }
 
     /* ========== Grounding 警告 ========== */
@@ -369,17 +314,10 @@ st.markdown("""
         padding: 10px 14px;
         background: #fffbeb;
         border: 1px solid #fde68a;
-        border-radius: var(--radius-sm);
+        border-radius: 6px;
         font-size: 0.82rem;
         color: #92400e;
         margin: 10px 0;
-    }
-
-    /* ========== 清空按钮 ========== */
-    div[data-testid="stButton"] > button[kind="secondary"] {
-        background: #fff !important;
-        border: 1px solid var(--gray-300) !important;
-        color: var(--gray-700) !important;
     }
 
     /* ========== 聊天输入框 ========== */
@@ -421,8 +359,28 @@ st.markdown("""
         .app-header { flex-direction: column; text-align: center; }
         .app-header-text h1 { font-size: 1.15rem; }
     }
+
+    /* ========== 附件按钮紧贴底部输入框 ========== */
+    .st-key-attach_toggle {
+        margin-bottom: -0.5rem !important;
+    }
+    [data-testid="stChatInput"] {
+        margin-top: -1rem !important;
+    }
 </style>
 """, unsafe_allow_html=True)
+
+
+# ===== 证据分级标记 → 高亮样式 =====
+_EVIDENCE_TAG_STYLES = {
+    "【资料明确说明】": "tag-supported",
+    "【跨文档整理】": "tag-integrated",
+    "【根据多份资料整理】": "tag-integrated",
+    "【推断】": "tag-inferred",
+    "【资料未说明】": "tag-missing",
+    "【资料无法确认】": "tag-missing",
+    "【非安得产品资料】": "tag-generic",
+}
 
 
 # ===== Session State =====
@@ -435,6 +393,9 @@ def _init_session():
         "last_result": None,
         "feedback_given": {},
         "msg_counter": 0,
+        "upload_text": "",
+        "upload_meta": None,
+        "show_attach": False,
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -458,6 +419,101 @@ def _load_pipeline():
     except Exception as e:
         _LOGGER.error(f"Pipeline init failed: {e}", exc_info=True)
         raise
+
+
+# ===== 上传文件文本提取 =====
+_IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff", ".ico"}
+_TEXT_EXTS = {".txt", ".md", ".log", ".csv", ".json", ".yaml", ".yml", ".xml", ".py", ".sh", ".ini", ".conf"}
+_UPLOAD_TYPES = ["pdf", "docx", "pptx", "xlsx", "xls", "txt", "md", "log", "csv",
+                 "json", "html", "htm", "png", "jpg", "jpeg", "webp"]
+
+
+def _extract_text(uploaded_file) -> tuple:
+    """从上传文件提取文本。返回 (text, kind)，kind ∈ {"text", "image", "unsupported"}"""
+    name = (uploaded_file.name or "").lower()
+    ext = Path(name).suffix
+    data = uploaded_file.getvalue()
+
+    if ext in _IMAGE_EXTS:
+        return "", "image"
+
+    if ext in _TEXT_EXTS:
+        for enc in ("utf-8", "gbk"):
+            try:
+                return data.decode(enc), "text"
+            except (UnicodeDecodeError, LookupError):
+                continue
+        return data.decode("utf-8", errors="ignore"), "text"
+
+    if ext == ".pdf":
+        try:
+            import fitz
+            doc = fitz.open(stream=data, filetype="pdf")
+            text = "\n".join(page.get_text() for page in doc)
+            doc.close()
+            return text, "text" if text.strip() else "unsupported"
+        except Exception as e:
+            _LOGGER.warning(f"PDF extract failed: {e}")
+            return "", "unsupported"
+
+    if ext == ".docx":
+        try:
+            import docx
+            d = docx.Document(io.BytesIO(data))
+            text = "\n".join(p.text for p in d.paragraphs)
+            return text, "text" if text.strip() else "unsupported"
+        except Exception as e:
+            _LOGGER.warning(f"DOCX extract failed: {e}")
+            return "", "unsupported"
+
+    if ext == ".pptx":
+        try:
+            from pptx import Presentation
+            prs = Presentation(io.BytesIO(data))
+            parts = []
+            for slide in prs.slides:
+                for shape in slide.shapes:
+                    if shape.has_text_frame:
+                        parts.append(shape.text)
+            text = "\n".join(parts)
+            return text, "text" if text.strip() else "unsupported"
+        except Exception as e:
+            _LOGGER.warning(f"PPTX extract failed: {e}")
+            return "", "unsupported"
+
+    if ext in {".xlsx", ".xlsm"}:
+        try:
+            import openpyxl
+            wb = openpyxl.load_workbook(io.BytesIO(data), read_only=True, data_only=True)
+            parts = []
+            for ws in wb.worksheets:
+                for row in ws.iter_rows(values_only=True):
+                    cells = [str(c) for c in row if c is not None]
+                    if cells:
+                        parts.append("\t".join(cells))
+            wb.close()
+            text = "\n".join(parts)
+            return text, "text" if text.strip() else "unsupported"
+        except Exception as e:
+            _LOGGER.warning(f"XLSX extract failed: {e}")
+            return "", "unsupported"
+
+    if ext in {".html", ".htm"}:
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(data, "html.parser")
+            text = soup.get_text("\n")
+            return text, "text" if text.strip() else "unsupported"
+        except Exception as e:
+            _LOGGER.warning(f"HTML extract failed: {e}")
+            return "", "unsupported"
+
+    for enc in ("utf-8", "gbk"):
+        try:
+            return data.decode(enc), "text"
+        except (UnicodeDecodeError, LookupError):
+            continue
+    return "", "unsupported"
 
 
 # ===== 日志工具 =====
@@ -491,7 +547,6 @@ def _log_feedback(query, answer, feedback):
 # ===== 渲染函数 =====
 
 def _score_tag(value: float, hi: float = 0.4, lo: float = 0.25) -> str:
-    """分数颜色标记"""
     if value > hi:
         return "score-high"
     elif value > lo:
@@ -502,10 +557,10 @@ def _score_tag(value: float, hi: float = 0.4, lo: float = 0.25) -> str:
 def _render_header():
     st.markdown("""
     <div class="app-header">
-        <div class="app-header-icon">🛡️</div>
+        <div class="app-header-icon">😎🎶</div>
         <div class="app-header-text">
-            <h1>安得EDG 技术支持助手</h1>
-            <p>基于安得产品手册 · 技术培训 · POC方案的智能知识问答</p>
+            <h1>技术支持助手</h1>
+            <p>canyoufeelmyworld</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -516,13 +571,6 @@ def _render_empty_state():
     <div class="empty-state">
         <div class="icon">💬</div>
         <div class="title">输入问题，开始查询</div>
-        <div class="hints">
-            <span>试试问：</span>
-            <span class="hint-chip">文件解密后又自动加密了怎么办</span>
-            <span class="hint-chip">AD域同步怎么配置</span>
-            <span class="hint-chip">水印功能支持哪些类型</span>
-            <span class="hint-chip">怎么做POC测试</span>
-        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -570,7 +618,6 @@ def _render_retrieval_detail(result: dict):
 
     timing = result.get("timing", {})
     with st.expander("🔍 检索分析", expanded=False):
-        # 耗时芯片
         chips = ""
         for label, key in [("分类", "classification"), ("向量检索", "retrieval"),
                             ("Rerank", "rerank"), ("LLM生成", "llm"), ("Grounding", "grounding")]:
@@ -616,29 +663,26 @@ def _render_answer_card(msg: dict, msg_id: str):
     }
     cat_label, cat_css = cat_config.get(category, ("📖 知识问答", "badge-knowledge"))
 
-    # 判断 LLM 是否实际拒答
-    refuse_markers = ["没有找到足够依据", "知识库中没有", "无法确认", "没有找到足够"]
+    refuse_markers = ["没有找到足够依据", "知识库中没有", "未检索到", "没有找到足够依据确认"]
     llm_refused = any(m in answer for m in refuse_markers)
 
     if llm_refused:
         card_class = "ai-card ai-card-refusal"
-        header_badge = f'<span class="badge badge-refusal">⚠️ 依据不足</span>'
+        header_badge = '<span class="badge badge-refusal">⚠️ 依据不足</span>'
     else:
         card_class = "ai-card"
         header_badge = f'<span class="badge {cat_css}">{cat_label}</span>'
 
-    # 用时标签
     timing = result.get("timing", {})
     total_t = timing.get("total", 0)
     time_str = f"{total_t:.1f}s" if total_t else ""
-
     regenerated = " · 🔄 已重新生成" if result.get("regenerated") else ""
 
     html = f"""
     <div class="{card_class}">
         <div class="ai-card-header">
             {header_badge}
-            <span style="font-size:0.78rem;color:var(--gray-400);margin-left:auto">{time_str}{regenerated}</span>
+            <span style="font-size:0.78rem;color:#9ca3af;margin-left:auto">{time_str}{regenerated}</span>
         </div>
         <div class="ai-card-body">
             {_md_to_html(answer)}
@@ -647,7 +691,6 @@ def _render_answer_card(msg: dict, msg_id: str):
     """
     st.markdown(html, unsafe_allow_html=True)
 
-    # Grounding 警告
     if grounding and is_answerable and not llm_refused:
         if not grounding.get("grounded", True):
             unverified = grounding.get("unverified", [])
@@ -657,20 +700,15 @@ def _render_answer_card(msg: dict, msg_id: str):
                     unsafe_allow_html=True,
                 )
 
-    # 参考资料
     st.markdown("#### 📚 参考资料")
     _render_references(result.get("evidences", []))
-
-    # 检索详情
     _render_retrieval_detail(result)
 
-    # 反馈 + 重新生成
     c1, c2, c3, c4 = st.columns([0.7, 0.7, 2.6, 1])
     fb_key = f"fb_{msg_id}"
 
     if st.session_state.feedback_given.get(fb_key):
-        fb_text = "✅ 已反馈" if st.session_state.feedback_given[fb_key] == "helpful" else "✅ 已反馈"
-        c1.markdown(f"<small>{fb_text}</small>", unsafe_allow_html=True)
+        c1.markdown("<small>✅ 已反馈</small>", unsafe_allow_html=True)
     else:
         with c1:
             if st.button("👍 有帮助", key=f"hlp_{msg_id}"):
@@ -689,7 +727,7 @@ def _render_answer_card(msg: dict, msg_id: str):
 
 
 def _md_to_html(text: str) -> str:
-    """极简 Markdown → HTML (处理标题/列表/引用/加粗)"""
+    """极简 Markdown → HTML（处理标题/列表/引用/加粗 + 证据分级标记高亮）"""
     import re
     lines = text.split("\n")
     out = []
@@ -699,7 +737,6 @@ def _md_to_html(text: str) -> str:
     for line in lines:
         stripped = line.strip()
 
-        # 空行
         if not stripped:
             if in_list:
                 out.append("</ul>")
@@ -710,7 +747,6 @@ def _md_to_html(text: str) -> str:
             out.append("<br>")
             continue
 
-        # H3
         if stripped.startswith("### "):
             if in_list:
                 out.append("</ul>"); in_list = False
@@ -719,12 +755,6 @@ def _md_to_html(text: str) -> str:
             out.append(f"<h3>{stripped[4:]}</h3>")
             continue
 
-        # 粗体标题行（如 **1.  xxx**）
-        if stripped.startswith("**") and "**" in stripped[2:]:
-            # 保持原样，markdown 粗体
-            pass
-
-        # 无序列表
         if re.match(r"^[-*]\s", stripped):
             if not in_list:
                 if in_olist:
@@ -732,12 +762,10 @@ def _md_to_html(text: str) -> str:
                 out.append("<ul>")
                 in_list = True
             content = re.sub(r"^[-*]\s+", "", stripped)
-            # 粗体
             content = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", content)
             out.append(f"<li>{content}</li>")
             continue
 
-        # 有序列表
         m = re.match(r"^(\d+)\.\s", stripped)
         if m:
             if not in_olist:
@@ -750,7 +778,6 @@ def _md_to_html(text: str) -> str:
             out.append(f"<li>{content}</li>")
             continue
 
-        # 引用
         if stripped.startswith("> "):
             if in_list:
                 out.append("</ul>"); in_list = False
@@ -761,7 +788,6 @@ def _md_to_html(text: str) -> str:
             out.append(f"<blockquote>{content}</blockquote>")
             continue
 
-        # 普通段落
         if in_list:
             out.append("</ul>"); in_list = False
         if in_olist:
@@ -774,12 +800,18 @@ def _md_to_html(text: str) -> str:
     if in_olist:
         out.append("</ol>")
 
-    return "\n".join(out)
+    html = "\n".join(out)
+
+    for tag, css in _EVIDENCE_TAG_STYLES.items():
+        html = html.replace(tag, f'<span class="{css}">{tag}</span>')
+
+    return html
 
 
 def _do_regenerate(msg: dict, msg_id: str):
     query = msg.get("query", "")
     evidences = msg.get("result", {}).get("evidences", [])
+    extra_context = msg.get("result", {}).get("extra_context", "")
     chat_history = st.session_state.chat_history[:-2] if len(st.session_state.chat_history) >= 2 else []
 
     if not evidences:
@@ -791,7 +823,8 @@ def _do_regenerate(msg: dict, msg_id: str):
 
         with st.spinner("🔄 基于相同证据重新生成中..."):
             classification = classify_query(query)
-            messages = build_messages(query, evidences, chat_history if chat_history else None)
+            messages = build_messages(query, evidences, chat_history if chat_history else None,
+                                      extra_context=extra_context)
             pipeline = _load_pipeline()
             answer_text = pipeline.llm_client.chat(messages)
             citations = build_citation_text(evidences)
@@ -826,7 +859,6 @@ def _friendly_error(e: Exception) -> str:
     for key, msg in _ERROR_MAP.items():
         if key.lower() in err_str.lower():
             return msg
-    # 临时显示真实错误用于排查 Cloud 部署问题
     return f"系统异常: {err_str[:200]}"
 
 
@@ -840,11 +872,52 @@ def _clear_conversation():
     _LOGGER.info("Conversation cleared")
 
 
+# ===== 附件栏（聊天框上方，右侧） =====
+def _render_attach_bar():
+    """渲染聊天框右下角的附件按钮 + 展开的上传面板"""
+    # 附件按钮：靠右对齐
+    left, right = st.columns([6, 1])
+    with right:
+        toggle = st.button("📎", key="attach_toggle", help="拍照 / 文件上传", use_container_width=True)
+        if toggle:
+            st.session_state.show_attach = not st.session_state.get("show_attach", False)
+
+    if st.session_state.get("show_attach"):
+        c1, c2 = st.columns([1, 1])
+        with c1:
+            photo = st.camera_input("📷 拍照", key="camera_upload")
+            if photo is not None:
+                st.image(photo, caption="已拍摄照片", use_container_width=True)
+                st.caption("⚠️ 纯文本模型暂不支持识别图片，请用文字描述截图关键信息")
+        with c2:
+            file = st.file_uploader("📁 文件", type=_UPLOAD_TYPES, key="file_upload")
+            if file is not None:
+                text, kind = _extract_text(file)
+                if kind == "text" and text.strip():
+                    text = text[:4000]
+                    st.session_state["upload_text"] = text
+                    st.session_state["upload_meta"] = {"name": file.name, "chars": len(text)}
+                    st.success(f"✅ 已加载「{file.name}」（{len(text)} 字）")
+                elif kind == "image":
+                    st.session_state["upload_text"] = ""
+                    st.session_state["upload_meta"] = None
+                    st.warning("⚠️ 图片暂不支持识别，请用文字描述")
+                else:
+                    st.session_state["upload_text"] = ""
+                    st.session_state["upload_meta"] = None
+                    st.warning("⚠️ 该文件格式暂不支持提取文本")
+
+    # 当前附件状态
+    meta = st.session_state.get("upload_meta")
+    if meta and st.session_state.get("upload_text"):
+        st.caption(f"📎 已附加：{meta['name']}（{meta['chars']} 字）")
+
+
 # ===== 主入口 =====
 def main():
     _render_header()
 
-    # ---- 侧边栏 ----
+    # ---- 侧边栏（关于信息） ----
     with st.sidebar:
         st.markdown("### ⚙️ 会话管理")
         if st.button("🗑️ 清空对话历史", use_container_width=True):
@@ -857,29 +930,29 @@ def main():
         st.markdown("---")
         st.markdown("### ℹ️ 关于")
         st.caption(
-            "**安得EDG技术支持助手** v0.5\n\n"
-            "基于RAG技术检索安得EDG产品手册、技术培训及POC测试方案，"
+            "**技术支持助手** v0.6\n\n"
+            "基于RAG技术检索产品手册、技术培训及实施文档，"
             "为售后工程师提供实施、配置及故障排查参考。\n\n"
             "⚠️ AI回答仅供参考，关键操作请以官方文档为准。"
         )
 
-        st.markdown("---")
-        st.caption("🛡️ 安得科技 · 内部工具")
-
     # ---- 消息区 ----
     if not st.session_state.chat_messages:
         st.markdown("<br>", unsafe_allow_html=True)
+        _render_empty_state()
     else:
         for i, msg in enumerate(st.session_state.chat_messages):
             role = msg.get("role", "")
             msg_id = msg.get("msg_id", str(i))
 
             if role == "user":
+                attachment = msg.get("attachment", "")
+                att_html = f'<div class="user-attach">📎 {attachment}</div>' if attachment else ""
                 st.markdown(f"""
                 <div class="user-msg-wrapper">
                     <div class="user-bubble">
                         <div class="user-label">YOU</div>
-                        {msg["content"]}
+                        {msg["content"]}{att_html}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -887,8 +960,11 @@ def main():
                 _render_answer_card(msg, msg_id)
                 st.markdown("<br>", unsafe_allow_html=True)
 
+    # ---- 附件栏（聊天框上方右侧） ----
+    _render_attach_bar()
+
     # ---- 输入 ----
-    query = st.chat_input("输入安得EDG技术问题...")
+    query = st.chat_input("输入你的技术问题...")
 
     if not query or not query.strip():
         return
@@ -900,20 +976,25 @@ def main():
         st.warning("请勿重复发送相同问题。")
         return
 
-    # 添加用户消息
+    extra_context = st.session_state.get("upload_text", "")
+    attach_name = (st.session_state.get("upload_meta") or {}).get("name", "")
+
     msg_id = str(st.session_state.msg_counter)
     st.session_state.msg_counter += 1
     st.session_state.chat_messages.append({
-        "role": "user", "content": query, "msg_id": msg_id + "_u",
+        "role": "user",
+        "content": query,
+        "msg_id": msg_id + "_u",
+        "attachment": attach_name,
     })
 
-    # 调用管线
     pipeline = _load_pipeline()
 
-    with (st.spinner("🔍 检索安得知识库中...")):
+    spinner_txt = "🔍 检索知识库并分析中..." if not extra_context else "🔍 检索知识库并分析附件材料..."
+    with (st.spinner(spinner_txt)):
         t0 = time.time()
         try:
-            result = pipeline.answer(query)
+            result = pipeline.answer(query, extra_context=extra_context)
             wall = time.time() - t0
         except Exception as e:
             _LOGGER.error(f"Pipeline error: {e}", exc_info=True)
@@ -933,6 +1014,7 @@ def main():
         "timing": result.timing,
         "grounding": result.grounding,
         "regenerated": False,
+        "extra_context": extra_context,
     }
 
     st.session_state.chat_messages.append({

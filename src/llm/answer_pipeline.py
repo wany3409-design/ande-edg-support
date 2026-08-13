@@ -145,8 +145,12 @@ class AnswerPipeline:
 
     # ===== 主流程 =====
 
-    def answer(self, query: str) -> AnswerResult:
-        """完整 RAG 问答流程"""
+    def answer(self, query: str, extra_context: str = "") -> AnswerResult:
+        """完整 RAG 问答流程
+
+        extra_context: 用户上传文件提取的补充材料（如日志/文档文本），
+        只作为 LLM 的额外上下文，不参与向量检索。
+        """
         timing = {}
         t_total = time.time()
 
@@ -205,7 +209,9 @@ class AnswerPipeline:
         t0 = time.time()
         if is_answerable:
             messages = build_messages(
-                query, reranked, low_vector_confidence=low_vector_confidence
+                query, reranked,
+                low_vector_confidence=low_vector_confidence,
+                extra_context=extra_context,
             )
             try:
                 answer_text = self.llm_client.chat(messages)
