@@ -32,6 +32,8 @@ from src.llm.prompt_builder import (
     ground_citations,
 )
 from src.llm.deepseek_client import get_client, DeepSeekClient
+from src.llm.query_expander import expand_queries
+from src.llm.chunk_filter import merge_query_results
 
 logger = logging.getLogger(__name__)
 
@@ -153,9 +155,11 @@ class AnswerPipeline:
         classification = classify_query(query)
         timing["classification"] = round(time.time() - t0, 3)
 
-        # Step 2: Query 编码 + ChromaDB 检索 (Top 10)
+        # Step 2: 多路检索（implementation/troubleshooting 做 query 扩展后合并去重）
         t0 = time.time()
-        raw_evidences = self._retrieve(query, n_results=self.top_k_candidate)
+        raw_evidences = self._multi_retrieve(
+            query, classification.category, n_results=self.top_k_candidate
+        )
         timing["retrieval"] = round(time.time() - t0, 3)
 
         if not raw_evidences:
@@ -173,7 +177,7 @@ class AnswerPipeline:
                 log_summary=self._build_log(query, classification, timing, 0, 0),
             )
 
-        # Step 3: Rerank (Top 10 -> Top 3-5)
+        # Step 3: Rerank (候选池 -> Top 3-5)
         t0 = time.time()
         reranked = self.reranker.rerank(
             query, raw_evidences, top_k=self.top_k_final
@@ -188,21 +192,35 @@ class AnswerPipeline:
             if reranked else 0
         )
         # 综合判断：rerank 分 + 向量相似度双重门槛
-        # V3: 400-char chunks，vec_sim 普遍偏低 → min_vec 降至 0.10
+        # V3: 250-char chunks，vec_sim 普遍偏低 → min_vec 降至 0.10
         is_answerable = (
             top1_vec_sim >= 0.10
             and top_rerank >= UNANSWERABLE_RERANK_THRESHOLD
         )
+        # 低向量置信度标记：向量相似度很低但 rerank 较高时，可能是关键词巧合匹配
+        # 此时应要求 LLM 更谨慎，不得把弱证据当成确定结论
+        low_vector_confidence = top1_vec_sim < 0.20
 
         # Step 5: 构建 messages + 调用 DeepSeek
         t0 = time.time()
         if is_answerable:
-            messages = build_messages(query, reranked)
+            messages = build_messages(
+                query, reranked, low_vector_confidence=low_vector_confidence
+            )
             try:
                 answer_text = self.llm_client.chat(messages)
             except Exception as e:
                 logger.error(f"DeepSeek API 调用失败: {e}")
                 answer_text = f"[LLM 调用失败: {e}]"
+            # 兜底：推理模型若推理耗尽 token 预算会返回空 content，
+            # 避免把空回答静默展示给用户。
+            if not answer_text or not answer_text.strip():
+                logger.warning("LLM 返回空内容，可能推理耗尽 max_tokens 预算")
+                answer_text = (
+                    "本次回答生成不完整（模型推理超时/超预算）。\n\n"
+                    "请将您的问题重新发送一次，或补充更多上下文（如所在模块、"
+                    "截图、版本信息），我将重新检索并作答。"
+                )
             citations = build_citation_text(reranked)
         else:
             answer_text = (
@@ -220,7 +238,9 @@ class AnswerPipeline:
         t0 = time.time()
         grounding = {}
         if is_answerable and answer_text and not answer_text.startswith("[LLM"):
-            grounding = ground_citations(answer_text, reranked)
+            grounding = ground_citations(
+                answer_text, reranked, low_vector_confidence=low_vector_confidence
+            )
             # 如果 grounding 不足，在回答末尾添加警告
             if not grounding.get("grounded", True) and grounding.get("claims_checked", 0) > 0:
                 unverified_count = len(grounding.get("unverified", []))
@@ -276,8 +296,10 @@ class AnswerPipeline:
             dist = res["distances"][0][rank]
             sim = round(1 - dist, 4)
             doc_text = res["documents"][0][rank]
+            chunk_id = res["ids"][0][rank]
 
             results.append({
+                "chunk_id": chunk_id,
                 "document": doc_text,
                 "metadata": meta,
                 "similarity": sim,
@@ -286,6 +308,31 @@ class AnswerPipeline:
             })
 
         return results
+
+    def _multi_retrieve(
+        self, query: str, category: str, n_results: int = 10
+    ) -> List[Dict[str, Any]]:
+        """
+        多路检索：对 implementation / troubleshooting 问题做 query 扩展，
+        多角度向量召回后合并去重 + 过滤垃圾 chunk。
+
+        返回一个更大的候选池（去重后按相似度降序）。
+        """
+        sub_queries = expand_queries(query, category)
+
+        results_by_query = []
+        for q in sub_queries:
+            try:
+                results = self._retrieve(q, n_results=n_results)
+                results_by_query.append(results)
+            except Exception as e:
+                logger.warning(f"子查询检索失败 '{q[:30]}': {e}")
+                continue
+
+        merged = merge_query_results(results_by_query)
+
+        # 限制候选池规模，避免送入 reranker 的文档过多影响性能
+        return merged[:40]
 
     # ===== 日志 =====
 

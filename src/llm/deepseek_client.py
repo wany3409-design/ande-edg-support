@@ -34,10 +34,15 @@ class DeepSeekClient:
         self,
         messages: list[dict],
         temperature: float = 0.3,
-        max_tokens: int = 2048,
+        max_tokens: int = 8192,
         stream: bool = False,
     ) -> str:
-        """同步对话（非流式）"""
+        """同步对话（非流式）
+
+        注意：deepseek-v4-pro 为推理模型，reasoning + 回答都计入 max_tokens。
+        若 max_tokens 过小，推理阶段会耗尽预算，导致 content 为空
+        (finish_reason=length)。故默认提高到 8192。
+        """
         t0 = time.time()
         try:
             response = self._client.chat.completions.create(
@@ -58,7 +63,7 @@ class DeepSeekClient:
         self,
         messages: list[dict],
         temperature: float = 0.3,
-        max_tokens: int = 2048,
+        max_tokens: int = 8192,
     ) -> Generator[str, None, None]:
         """流式对话"""
         try:
