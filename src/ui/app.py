@@ -9,6 +9,7 @@ import sys
 import io
 import time
 import json
+import uuid
 import logging
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -396,6 +397,11 @@ def _init_session():
         "upload_text": "",
         "upload_meta": None,
         "show_attach": False,
+        # 本地对话历史
+        "sessions": [],
+        "current_session_id": None,
+        "current_session_created": None,
+        "sessions_loaded": False,
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -837,6 +843,7 @@ def _do_regenerate(msg: dict, msg_id: str):
             msg["result"]["category_confidence"] = classification.confidence
             msg["result"]["regenerated"] = True
             _LOGGER.info(f"REGENERATE | query={query[:80]}")
+            _persist_current_session()
             st.rerun()
     except Exception as e:
         _LOGGER.error(f"Regenerate failed: {e}", exc_info=True)
@@ -862,14 +869,142 @@ def _friendly_error(e: Exception) -> str:
     return f"系统异常: {err_str[:200]}"
 
 
-def _clear_conversation():
-    st.session_state.chat_history = []
+# ===== 本地对话历史持久化 =====
+_HISTORY_FILE = _LOG_DIR / "chat_history.json"
+_MAX_SESSIONS = 200  # 最多保留的会话数
+
+
+def _load_sessions() -> list:
+    """从磁盘加载历史会话列表（按更新时间倒序）"""
+    try:
+        if _HISTORY_FILE.exists():
+            data = json.loads(_HISTORY_FILE.read_text(encoding="utf-8"))
+            if isinstance(data, list):
+                data.sort(key=lambda s: s.get("updated_at", ""), reverse=True)
+                return data
+    except Exception as e:
+        _LOGGER.warning(f"加载历史会话失败: {e}")
+    return []
+
+
+def _save_sessions(sessions: list):
+    """将会话列表写入磁盘"""
+    try:
+        _HISTORY_FILE.write_text(
+            json.dumps(sessions[:_MAX_SESSIONS], ensure_ascii=False, indent=2, default=str),
+            encoding="utf-8",
+        )
+    except Exception as e:
+        _LOGGER.warning(f"保存历史会话失败: {e}")
+
+
+def _new_session_id() -> str:
+    return f"{datetime.now(_TZ_BEIJING).strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:6]}"
+
+
+def _current_session_title() -> str:
+    for m in st.session_state.chat_messages:
+        if m.get("role") == "user":
+            return (m.get("content") or "未命名会话")[:20]
+    return "新会话"
+
+
+def _load_history_if_needed():
+    """首次运行时从磁盘加载历史，并默认恢复最近一次会话"""
+    if st.session_state.get("sessions_loaded"):
+        return
+    st.session_state.sessions = _load_sessions()
+    st.session_state.sessions_loaded = True
+
+    if not st.session_state.chat_messages and st.session_state.sessions:
+        _restore_session(st.session_state.sessions[0])
+
+    if not st.session_state.current_session_id:
+        st.session_state.current_session_id = _new_session_id()
+        st.session_state.current_session_created = _now()
+
+
+def _restore_session(session: dict):
+    """恢复某个历史会话到当前会话"""
+    st.session_state.chat_messages = list(session.get("messages", []))
+    st.session_state.current_session_id = session.get("id") or _new_session_id()
+    st.session_state.current_session_created = session.get("created_at") or _now()
+
+    st.session_state.last_evidences = None
+    st.session_state.last_query = None
+    st.session_state.last_result = None
+    for m in reversed(st.session_state.chat_messages):
+        if m.get("role") == "assistant" and m.get("result"):
+            st.session_state.last_evidences = m["result"].get("evidences", [])
+            st.session_state.last_query = m.get("query")
+            st.session_state.last_result = m["result"]
+            break
+
+    ch = []
+    for m in st.session_state.chat_messages:
+        if m.get("role") == "user":
+            ch.append({"role": "user", "content": m.get("content", "")})
+        elif m.get("role") == "assistant":
+            ch.append({"role": "assistant", "content": m.get("content", "")[:1000]})
+    st.session_state.chat_history = ch[-20:]
+    st.session_state.msg_counter = len(st.session_state.chat_messages) + 1
+    st.session_state.feedback_given = {}
+
+
+def _persist_current_session():
+    """把当前会话写入内存列表并落盘"""
+    msgs = st.session_state.chat_messages
+    if not msgs:
+        return
+    sid = st.session_state.current_session_id or _new_session_id()
+    st.session_state.current_session_id = sid
+
+    title = "未命名会话"
+    for m in msgs:
+        if m.get("role") == "user":
+            title = m.get("content") or "未命名会话"
+            break
+
+    session = {
+        "id": sid,
+        "title": title[:30],
+        "created_at": st.session_state.get("current_session_created") or _now(),
+        "updated_at": _now(),
+        "messages": list(msgs),
+    }
+
+    sessions = [s for s in st.session_state.sessions if s.get("id") != sid]
+    sessions.insert(0, session)
+    st.session_state.sessions = sessions
+    _save_sessions(sessions)
+
+
+def _new_session():
+    """新建一个空会话"""
     st.session_state.chat_messages = []
+    st.session_state.current_session_id = _new_session_id()
+    st.session_state.current_session_created = _now()
     st.session_state.last_evidences = None
     st.session_state.last_query = None
     st.session_state.last_result = None
     st.session_state.feedback_given = {}
-    _LOGGER.info("Conversation cleared")
+    st.session_state.chat_history = []
+    st.session_state.msg_counter = 0
+
+
+def _delete_current_session():
+    """删除当前会话（从历史移除并清空）"""
+    sid = st.session_state.current_session_id
+    st.session_state.sessions = [s for s in st.session_state.sessions if s.get("id") != sid]
+    _save_sessions(st.session_state.sessions)
+    _new_session()
+
+
+def _clear_all_sessions():
+    """清空全部历史会话"""
+    st.session_state.sessions = []
+    _save_sessions([])
+    _new_session()
 
 
 # ===== 附件栏（聊天框上方，右侧） =====
@@ -915,24 +1050,52 @@ def _render_attach_bar():
 
 # ===== 主入口 =====
 def main():
+    _load_history_if_needed()
     _render_header()
 
-    # ---- 侧边栏（关于信息） ----
+    # ---- 侧边栏（会话管理 + 历史记录 + 关于） ----
     with st.sidebar:
         st.markdown("### ⚙️ 会话管理")
-        if st.button("🗑️ 清空对话历史", use_container_width=True):
-            _clear_conversation()
+        if st.button("🆕 新建会话", use_container_width=True):
+            _new_session()
             st.rerun()
 
+        cur_title = _current_session_title()
         msg_count = len([m for m in st.session_state.chat_messages if m.get("role") == "user"])
-        st.caption(f"💬 本轮已提问 {msg_count} 次")
+        st.caption(f"💬 当前会话「{cur_title}」· {msg_count} 次提问")
+
+        if st.button("🗑️ 删除当前会话", use_container_width=True):
+            _delete_current_session()
+            st.rerun()
+
+        st.markdown("---")
+        st.markdown("### 📜 历史记录")
+        sessions = st.session_state.sessions
+        if not sessions:
+            st.caption("暂无历史会话，提问后会自动保存")
+        else:
+            st.caption(f"共 {len(sessions)} 个会话，点击恢复")
+            for s in sessions:
+                title = (s.get("title") or "未命名会话")[:18]
+                updated = (s.get("updated_at") or "")[:16].replace("T", " ")
+                label = f"{title} · {updated}"
+                if s.get("id") == st.session_state.current_session_id:
+                    label = "● " + label
+                if st.button(label, key=f"load_{s.get('id')}", use_container_width=True):
+                    _restore_session(s)
+                    st.rerun()
+
+            if st.button("🧹 清空全部历史", use_container_width=True):
+                _clear_all_sessions()
+                st.rerun()
 
         st.markdown("---")
         st.markdown("### ℹ️ 关于")
         st.caption(
-            "**技术支持助手** v0.6\n\n"
+            "**技术支持助手** v0.7\n\n"
             "基于RAG技术检索产品手册、技术培训及实施文档，"
             "为售后工程师提供实施、配置及故障排查参考。\n\n"
+            "💾 对话历史已本地自动保存。\n\n"
             "⚠️ AI回答仅供参考，关键操作请以官方文档为准。"
         )
 
@@ -1033,6 +1196,7 @@ def main():
     if len(st.session_state.chat_history) > 20:
         st.session_state.chat_history = st.session_state.chat_history[-20:]
 
+    _persist_current_session()
     _log_query(query, result_dict, wall)
     st.rerun()
 
