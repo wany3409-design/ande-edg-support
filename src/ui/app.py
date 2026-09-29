@@ -15,8 +15,9 @@ import logging
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-# 彻底关闭离线模式：Cloud 全新环境必须联网下载模型；
-# 显式置 0 覆盖任何可能从环境/Secrets 继承的 HF_HUB_OFFLINE=1
+# 国内网络无法直连 huggingface.co，改用国内镜像 hf-mirror.com 下载模型；
+# 同时彻底关闭离线模式（显式置 0，覆盖任何可能继承的离线设置）
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 os.environ["HF_HUB_OFFLINE"] = "0"
 os.environ["TRANSFORMERS_OFFLINE"] = "0"
 
