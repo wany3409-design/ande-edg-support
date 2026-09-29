@@ -1168,6 +1168,9 @@ def main():
         "attachment": attach_name,
     })
 
+    # 立即落盘用户提问：即使后续 AI 回答失败/超时、或中途关闭页面，提问也不会丢失
+    _persist_current_session()
+
     pipeline = _load_pipeline()
 
     spinner_txt = "🔍 检索知识库并分析中..." if not extra_context else "🔍 检索知识库并分析附件材料..."
