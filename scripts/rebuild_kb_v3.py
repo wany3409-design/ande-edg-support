@@ -11,6 +11,18 @@ Phase 4.5: 重建知识库
 import sys, os, time, shutil
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# 离线加载 embedding 模型（模型已本地缓存，避免联网访问 huggingface 超时卡死）
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
+# Windows 控制台默认 GBK 编码，遇到 PDF 里的私有区字符会崩溃；
+# 强制 stdout/stderr 走 UTF-8 + 容错替换，保证打印不中断。
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 import chromadb
 from chromadb.config import Settings
 from sentence_transformers import SentenceTransformer

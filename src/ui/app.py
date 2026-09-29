@@ -7,12 +7,17 @@
 
 import sys
 import io
+import os
 import time
 import json
 import uuid
 import logging
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+
+# 离线加载 embedding 模型（已本地缓存，避免联网访问 huggingface 超时卡死）
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 
 _PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
