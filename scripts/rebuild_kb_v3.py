@@ -11,9 +11,20 @@ Phase 4.5: 重建知识库
 import sys, os, time, shutil
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# 离线加载 embedding 模型（模型已本地缓存，避免联网访问 huggingface 超时卡死）
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
-os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+# 仅在本地已缓存 embedding 模型时才启用离线模式，避免联网访问 huggingface 超时卡死；
+# 全新环境（无缓存）则允许联网下载。
+def _enable_hf_offline_if_cached():
+    model = os.getenv("EMBEDDING_MODEL_NAME") or "BAAI/bge-small-zh-v1.5"
+    hub_root = os.environ.get("HF_HOME") or os.path.join(
+        os.path.expanduser("~"), ".cache", "huggingface"
+    )
+    model_dir = os.path.join(hub_root, "hub", "models--" + model.replace("/", "--"))
+    if os.path.isdir(model_dir):
+        os.environ.setdefault("HF_HUB_OFFLINE", "1")
+        os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
+
+_enable_hf_offline_if_cached()
 
 # Windows 控制台默认 GBK 编码，遇到 PDF 里的私有区字符会崩溃；
 # 强制 stdout/stderr 走 UTF-8 + 容错替换，保证打印不中断。

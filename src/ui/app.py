@@ -15,9 +15,21 @@ import logging
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-# 离线加载 embedding 模型（已本地缓存，避免联网访问 huggingface 超时卡死）
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
-os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+# 仅在本地已缓存 embedding 模型时才启用离线模式：
+# - 本地开发：模型已缓存 → 离线加载，避免联网访问 huggingface 超时卡死
+# - Streamlit Cloud 等全新环境：无缓存 → 必须允许联网下载，否则报 LocalEntryNotFoundError
+def _enable_hf_offline_if_cached():
+    model = os.getenv("EMBEDDING_MODEL_NAME") or "BAAI/bge-small-zh-v1.5"
+    hub_root = os.environ.get("HF_HOME") or os.path.join(
+        os.path.expanduser("~"), ".cache", "huggingface"
+    )
+    model_dir = os.path.join(hub_root, "hub", "models--" + model.replace("/", "--"))
+    if os.path.isdir(model_dir):
+        os.environ.setdefault("HF_HUB_OFFLINE", "1")
+        os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
+
+_enable_hf_offline_if_cached()
 
 _PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
