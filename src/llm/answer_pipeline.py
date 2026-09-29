@@ -9,6 +9,7 @@ RAG 回答全链路管线
 
 import time
 import logging
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 
@@ -17,6 +18,7 @@ from chromadb.config import Settings
 from sentence_transformers import SentenceTransformer
 
 from src.config import (
+    PROJECT_ROOT,
     CHROMA_PERSIST_DIR,
     EMBEDDING_MODEL_NAME,
     EMBEDDING_DEVICE,
@@ -41,6 +43,9 @@ logger = logging.getLogger(__name__)
 # ===== Phase 4.5 使用 V3 collection (400-char chunks, improved HTML parser) =====
 PHASE4_COLLECTION = "ande_edg_v3"
 PHASE4_EMBEDDING_MODEL = "BAAI/bge-small-zh-v1.5"
+# 仓库内捆绑的模型目录：Cloud 无法联网下载 huggingface 模型时，直接走本地路径加载，
+# 无需任何网络/HF 镜像，保证首次启动即可用。文件随 git 一起克隆到 Cloud。
+PHASE4_EMBEDDING_MODEL_PATH = str(PROJECT_ROOT / "models" / "bge-small-zh-v1.5")
 
 # 不可回答判断阈值：综合 rerank 评分低于此值时，标记为知识库外
 # 250-char chunks 平衡版本
@@ -81,7 +86,7 @@ class AnswerPipeline:
     def __init__(
         self,
         collection_name: str = PHASE4_COLLECTION,
-        embedding_model_name: str = PHASE4_EMBEDDING_MODEL,
+        embedding_model_name: Optional[str] = None,
         device: str = EMBEDDING_DEVICE,
         top_k_candidate: int = RETRIEVAL_TOP_K_CANDIDATE,
         top_k_final: int = RETRIEVAL_TOP_K,
@@ -89,6 +94,14 @@ class AnswerPipeline:
         self.collection_name = collection_name
         self.top_k_candidate = top_k_candidate
         self.top_k_final = top_k_final
+
+        # 优先使用仓库内捆绑的本地模型（无需联网）；本地目录不存在时才回退到 HF hub 名称
+        if embedding_model_name is None:
+            embedding_model_name = (
+                PHASE4_EMBEDDING_MODEL_PATH
+                if Path(PHASE4_EMBEDDING_MODEL_PATH).is_dir()
+                else PHASE4_EMBEDDING_MODEL
+            )
 
         # 延迟加载，避免导入时就加载模型
         self._embedding_model: Optional[SentenceTransformer] = None

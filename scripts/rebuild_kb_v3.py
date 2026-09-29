@@ -33,7 +33,12 @@ from src.rag.ingestion import IngestionPipeline
 from src.text_processor.splitter import TextSplitter
 
 COLLECTION_NAME = "ande_edg_v3"
-EMBEDDING_MODEL = "BAAI/bge-small-zh-v1.5"
+# 优先用仓库内捆绑的本地模型（离线可重建）；不存在时回退到 HF hub 名称
+_LOCAL_MODEL_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "models", "bge-small-zh-v1.5",
+)
+EMBEDDING_MODEL = _LOCAL_MODEL_PATH if os.path.isdir(_LOCAL_MODEL_PATH) else "BAAI/bge-small-zh-v1.5"
 
 # V2-style chunk size (dense retrieval) + V3 improvements (HTML parser, topics)
 CHUNK_SIZE = 250
